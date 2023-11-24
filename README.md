@@ -3,13 +3,13 @@
 A Rapid-Fire / Trivia website to test your Bash, HTML, and JS skills (and more!)
 "Grep" from your knowledge and score more to be on top of a leaderboard!
 
-## Tech Stack
+## Tech Stack:
 
 -   Nodejs (v21.2.0)
 -   ExpressJS
 -   MongoDB
 
-## Dependencies
+## Dependencies:
 
 You need npm/yarn installed in your local machine in order to run this app.
 
@@ -24,7 +24,7 @@ You need npm/yarn installed in your local machine in order to run this app.
 -   After the process is completed, run the command `npm start`.
 -   The backend will be live on `localhost:4000`.
 
-## Installation
+## Installation:
 
 ```bash
   npm install
@@ -46,22 +46,44 @@ You need npm/yarn installed in your local machine in order to run this app.
 -   Helps you "Grep" these commands from your knowledge-base!
 -   Attempt to beat your own high-score, and practice for the same in the customizable practice-space! It's not always about competing everytime...
 
-## Reference Links
+## Reference Links:
 
 -   [Download and install the latest version of Git.](https://git-scm.com/downloads)
 -   [Set your username in Git.](https://help.github.com/articles/setting-your-username-in-git)
 -   [Set your commit email address in Git.](https://help.github.com/articles/setting-your-commit-email-address-in-git)
 -   [Setup Nodejs](https://nodejs.org/en/blog/release/v16.18.1/)
 
-## Claim an issue
+## Directory Structure:
+
+```
+.
+├── app.js
+├── package.json
+├── package-lock.json
+├── README.md
+└── src
+    ├── config
+    │   └── db.config.js
+    ├── controllers
+    │   └── userAuth.controllers.js
+    ├── middlewares
+    │   └── userAuth.middleware.js
+    └── routes
+        └── v1
+            └── userAuth.routes.js
+
+6 directories, 8 files
+```
+
+## Claim an issue:
 
 Comment on the issue. In case of no activity on the issue even after 2 days, the issue will be reassigned. If you have difficulty approaching the issue, feel free to ask on our discord channel.
 
-## Communication
+## Communication:
 
 Whether you are working on a new feature or facing a doubt please feel free to ask us on our [discord](https://discord.gg/D9999YTkS8) channel. We will be happy to help you out.
 
-## Guidelines
+## Guidelines:
 
 Please help us follow the best practice to make it easy for the reviewer as well as the contributor. We want to focus on the code quality more than on managing pull request ethics.
 
@@ -78,3 +100,4 @@ Please help us follow the best practice to make it easy for the reviewer as well
 -   Avoid duplicate PRs, if need be comment on the older PR with the PR number of the follow-up (new PR) and close the obsolete PR yourself.
 
 -   Be polite: Be polite to other community members.
+
