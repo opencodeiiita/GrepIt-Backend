@@ -5,20 +5,13 @@ A Rapid-Fire / Trivia website to test your Bash, HTML, and JS skills (and more!)
 
 ## Tech Stack
 
--   Nodejs (v20.5.1)
+-   Nodejs (v21.2.0)
 -   ExpressJS
 -   MongoDB
 
 ## Dependencies
 
 You need npm/yarn installed in your local machine in order to run this app.
-
-## Installation
-
-```bash
-  npm install
-  npm start
-```
 
 ## How To Setup
 
@@ -31,9 +24,16 @@ You need npm/yarn installed in your local machine in order to run this app.
 -   After the process is completed, run the command `npm start`.
 -   The backend will be live on `localhost:4000`.
 
+## Installation
+
+```bash
+  npm install
+  npm start
+```
+
 ## 🚀 How It Works:
 
--   Receive a prompt to enter a command or HTML tag.
+-   Receive a prompt to enter a command or HTML tag or JS keywords.
 -   Race against time to input the correct response.
 -   Earn points for accuracy and speed.
 
@@ -44,6 +44,7 @@ You need npm/yarn installed in your local machine in order to run this app.
 -   Educational and entertaining for beginners and experts alike.
 -   Helps brush up your grasp on these topics.
 -   Helps you "Grep" these commands from your knowledge-base!
+-   Attempt to beat your own high-score, and practice for the same in the customizable practice-space! It's not always about competing everytime...
 
 ## Reference Links
 

@@ -1,0 +1,23 @@
+{
+    "name": "grepit-backend",
+    "type": "module",
+    "version": "1.0.0",
+    "description": "A Rapid-Fire / Trivia website to test your Bash, HTML, and JS skills (and more!) \"Grep\" from your knowledge and score more to be on top of a leaderboard!",
+    "main": "app.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "start": "nodemon app.js"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.1",
+        "prettier": "^3.1.0"
+    }
+}
