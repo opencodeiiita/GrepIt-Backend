@@ -1,42 +1,35 @@
 # GrepIt-Backend
 
-Backend for a Rapid-Fire / Trivia website to test your technical skills along with your buddies
-"Grep" from your knowledge and score more to be on top of a leaderboard!
+A quiz-hosting application, where a user can create a quiz-room, allowing multiple others to join the room. The questions can be set manually for that room, and the one with the most right answers win the top-spot on the leaderboard!
 
 ## 📚 Table Of Contents
 
-- [How It Works](#🚀-how-it-works)
-- [Features](#🌐-features)
-- [Tech Stack](#⚡-tech-stack)
-- [Dependencies](#📦-dependencies)
-- [How To Setup](#🛠️-how-to-setup)
-- [Reference Links](#🔗-reference-links)
-- [Directory Structure](#📁-directory-structure)
-- [Claim an Issue](#👆-claim-an-issue)
-- [Communication](#💻-communication)
-- [License](#🛡️-license)
-- [Contribution Guidelines](#📋-contribution-guidelines)
+-   [How It Works](#🚀-how-it-works)
+-   [Features](#🌐-features)
+-   [Tech Stack](#⚡-tech-stack)
+-   [Dependencies](#📦-dependencies)
+-   [How To Setup](#🛠️-how-to-setup)
+-   [Reference Links](#🔗-reference-links)
+-   [Directory Structure](#📁-directory-structure)
+-   [Claim an Issue](#👆-claim-an-issue)
+-   [Communication](#💻-communication)
+-   [License](#🛡️-license)
+-   [Contribution Guidelines](#📋-contribution-guidelines)
+-   [Mentors](#🤝-Mentors)
 
-## 🚀 How It Works:
+## 🚀 How It Works:-
 
--   Receive a prompt to enter a command or HTML tag or JS keywords.
--   Race against time to input the correct response.
--   Earn points for accuracy and speed.
-
-## 🌐 Features:
-
--   Diverse challenges covering bash commands, HTML tags, and more.
--   Real-time scoring and leaderboard for competitive fun.
--   Educational and entertaining for beginners and experts alike.
--   Helps brush up your grasp on these topics.
--   Helps you "Grep" these commands from your knowledge-base!
--   Attempt to beat your own high-score, and practice for the same in the customizable practice-space! It's not always about competing everytime...
+-   The creator has the option to create multiple MCQ type questions.
+-   Other users can join the room entering the code.
+-   Once the creator starts the quiz, each question will be displayed one-by-one, each having a timer and points awarded based on how fast one answers.
+-   At the end of the quiz, you will be able to view a leaderboard. The creator can now restart the quiz (having the option to reset the questions).
+-   Features can be implemented to archive the room and the leaderboard.
 
 ## ⚡ Tech Stack:
 
 -   Nodejs (v20.5.0)
 -   ExpressJS
--   
+-   MySQL
 
 ## 📦 Dependencies:
 
@@ -59,9 +52,7 @@ You need npm/yarn installed in your local machine in order to run this app.
   npm start
 ```
 
-## 🔗 Reference Links:
-
-### 🚀 Starter
+## Reference Links:
 
 -   [Download and install the latest version of Git.](https://git-scm.com/downloads)
 -   [Set your username in Git.](https://help.github.com/articles/setting-your-username-in-git)
@@ -113,6 +104,8 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
 
 Comment on the issue. In case of no activity on the issue even after 2 days, the issue will be reassigned. If you have difficulty approaching the issue, feel free to ask on our discord channel.
 
+-   It is also requested to make your entry in [CONTRIBUTORS](CONTRIBUTORS.md) markdown file before submitting the PR.
+
 ## 💻 Communication:
 
 Whether you are working on a new feature or facing a doubt please feel free to ask us on our [discord](https://discord.gg/D9999YTkS8) channel. We will be happy to help you out.
@@ -142,16 +135,18 @@ Please help us follow the best practice to make it easy for the reviewer as well
 ## 🤝 Mentors
 
 1.  **Bhupesh Dewangan**  
-    *Opencode Bot Developer*  
-    *The YT demonstrator guy ;-;*  
+    _Opencode Bot Developer_  
+    _The YT demonstrator guy ;-;_  
     `githubID:` [bhupesh98](https://github.com/bhupesh98)  
-    `discordID:` bhupesh6726
+    `discordID:` bhupesh6726 (aka Bhupesh)
 
-2. **Vatsal Bhuva**  
-    *Just an ordinary guy*  
+2.  **Vatsal Bhuva**  
+    _Opencode Portal Developer_  
+    _Most active mod on Discord(ig?)_
     `githubID:` [VatsalBhuva11](https://github.com/VatsalBhuva11)  
-    `discordID:` vbx11
+    `discordID:` vb11x (aka vatsal)
 
 ## 💪 Thanks To All Contributors
 
 All the contributor's github profile image will be displayed here, pick up the best one real quick.
+
