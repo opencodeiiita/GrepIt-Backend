@@ -1,0 +1,15 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "mysql"
+    url      = env("DATABASE_URL")
+}
+
+//do not touch this model, this was for creating a non-empty db.
+model Init {
+    id Int @id @default(autoincrement())
+}
+
+//create other models below:
