@@ -155,5 +155,7 @@ Please help us follow the best practice to make it easy for the reviewer as well
 
 ## 💪 Thanks To All Contributors
 
-All the contributor's github profile image will be displayed here, pick up the best one real quick.
+All the contributor's github profile image will be displayed here, pick up the best one real quick.  
+
+<img src="https://contrib.rocks/image?repo=opencodeiiita/GrepIt-Backend"/>
 
