@@ -79,22 +79,29 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
 
 ```bash
 .
-├── 📄 app.js
-├── 🧾 package.json
-├── 🧾 package-lock.json
-├──  ℹ️ README.md
+├── API_ENDPOINTS.md
+├── app.js
+├── CONTRIBUTORS.md
+├── LICENSE
+├── package.json
+├── package-lock.json
+├── prisma
+│   └── schema.prisma
+├── README.md
 └── src
     ├── config
-    │   └── 📄 db.config.js
+    │   └── db.config.js
     ├── controllers
-    │   └── 📄 userAuth.controllers.js
+    │   └── userAuth.controllers.js
     ├── middlewares
-    │   └── 📄 userAuth.middleware.js
+    │   └── userAuth.middleware.js
+    ├── models
+    │   └── user.model.js
     └── routes
         └── v1
-            └── 📄 userAuth.routes.js
+            └── userAuth.routes.js
 
-6 directories, 8 files
+8 directories, 13 files
 ```
 
 > [!NOTE]
@@ -142,7 +149,7 @@ Please help us follow the best practice to make it easy for the reviewer as well
 
 2.  **Vatsal Bhuva**  
     _Opencode Portal Developer_  
-    _Most active mod on Discord(ig?)_
+    _Most active mod on Discord (ig?)_<br/>
     `githubID:` [VatsalBhuva11](https://github.com/VatsalBhuva11)  
     `discordID:` vb11x (aka vatsal)
 
