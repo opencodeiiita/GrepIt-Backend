@@ -1,15 +1,48 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "mysql"
-    url      = env("DATABASE_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 //do not touch this model, this was for creating a non-empty db.
 model Init {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 }
 
-//create other models below:
+model User {
+  id         Int    @id @default(autoincrement())
+  name       String
+  email      String @unique
+  password   String
+  currPoints Int    @default(0)
+  userRoom   Room?  @relation(fields: [userRoomId], references: [roomId])
+  userRoomId Int?
+}
+
+model Question {
+  questionId      Int      @id @default(autoincrement())
+  question        String
+  options         Option[] @relation("QuestionToOptions")
+  correctOption   Option   @relation(fields: [correctOptionId], references: [optionId])
+  correctOptionId Int
+  room            Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId], onDelete: Cascade)
+  roomId          Int
+}
+
+model Option {
+  optionId   Int        @id @default(autoincrement())
+  option     String
+  question   Question   @relation("QuestionToOptions", fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionId Int
+  Question   Question[]
+}
+
+model Room {
+  roomId    Int        @id @default(autoincrement())
+  code      String     @unique
+  questions Question[] @relation("RoomToQuestions")
+  users     User[]
+}
