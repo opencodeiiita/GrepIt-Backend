@@ -6,7 +6,9 @@
     "main": "app.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "nodemon app.js"
+        "start": "node app.js",
+        "dev": "nodemon app.js",
+        "start:babel": "babel-node src/index.js"
     },
     "keywords": [],
     "author": "",
@@ -17,7 +19,18 @@
         "express": "^4.18.2"
     },
     "devDependencies": {
+        "@babel/core": "^7.23.5",
+        "@babel/preset-env": "^7.23.5",
+        "eslint": "^8.55.0",
+        "morgan": "^1.10.0",
         "nodemon": "^3.0.1",
         "prettier": "^3.1.0"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/opencodeiiita/ClipEverything-Backend.git"
+    },
+    "bugs": {
+        "url": "https://github.com/opencodeiiita/ClipEverything-Backend/issues"
     }
 }
