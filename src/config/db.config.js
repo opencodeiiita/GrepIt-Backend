@@ -1,11 +1,14 @@
-/* eslint-disable no-unused-vars */
-import dotenv from 'dotenv';
-import mysql from 'mysql2';
-dotenv.config();
+import { PrismaClient } from '@prisma/client';
+const prisma = new PrismaClient();
+export default prisma;
 
-// Create the connection to the database
 export async function connDB() {
-    const connection = mysql.createConnection(process.env.DATABASE_URL);
-    console.log('Successfully connected to DB! ✨');
+    try {
+        await prisma.$connect();
+        console.log(`Successfully connected to Database ✨`);
+    } catch (error) {
+        console.log(`Error occurred while connecting to Database ❌`);
+        console.log(error);
+    }
 }
 
