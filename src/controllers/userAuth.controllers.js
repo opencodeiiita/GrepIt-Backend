@@ -3,13 +3,6 @@ import prisma from "../config/db.config.js";
 
 const saltRounds = 10;
 
-// async function getHash(password) {
-//     await bcrypt.hash(password, saltRounds).then(function(hash) {
-//         console.log(hash);
-//         return hash;
-//     });
-// }
-
 async function registerUser(req, res) {
     try {
         const salt = await bcrypt.genSalt(saltRounds);
