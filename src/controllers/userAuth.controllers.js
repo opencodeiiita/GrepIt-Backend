@@ -84,8 +84,4 @@ async function loginUser(req, res) {
     }
 }
 
-export default {
-    registerUser, 
-    loginUser
-};
-
+export { registerUser, loginUser };
