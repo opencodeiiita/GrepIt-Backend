@@ -2,8 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import dotenv from 'dotenv';
-import { connDB } from './src/config/db.config.js';
-import { default as userAuthRoute } from './src/routes/v1/userAuth.routes.js';
+import prisma, { connDB } from './src/config/db.config.js';
+import router from './src/routes/index.routes.js';
 
 dotenv.config();
 const app = express();
@@ -17,7 +17,7 @@ app.get('/', (req, res) => {
     res.send('Hello World');
 });
 
-app.use("/api/v1/auth/register", userAuthRoute);
+app.use("/api", router);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
