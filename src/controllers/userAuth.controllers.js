@@ -52,6 +52,13 @@ async function loginUser(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 email: email
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                password: true,
+                currPoints: true,
             }
         });
 
@@ -75,7 +82,12 @@ async function loginUser(req, res) {
 
         res.status(200).json({
             message: 'User logged in successfully',
-            user: user,
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                currPoints: user.currPoints,
+            },
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);
