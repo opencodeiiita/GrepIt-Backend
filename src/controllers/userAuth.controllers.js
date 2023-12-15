@@ -53,13 +53,6 @@ async function loginUser(req, res) {
             where: {
                 email: email
             },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                password: true,
-                currPoints: true,
-            }
         });
 
         if (!user) {
