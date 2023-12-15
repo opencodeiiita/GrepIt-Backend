@@ -1,7 +1,7 @@
 import express from "express";
 
 import {default as userAuthRouter} from "./userAuth.routes.js"
-import { roomRouter } from "./room.routes.js"
+import { default as roomRouter } from "./room.routes.js"
 
 const router = express.Router();
 
