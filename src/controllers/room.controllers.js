@@ -54,6 +54,47 @@ async function createRoom(req, res) {
     }
 }
 
+async function updateRoom(req, res) {
+    try {
+        const roomId = parseInt(req.query.roomId);
+        const { roomName, roomDescription } = req.body;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                roomId: roomId
+            }
+        });
+
+        if (!room) {
+            console.log('Error updating room: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const updatedRoom = await prisma.room.update({
+            where: {
+                roomId: Number(roomId)
+            },
+            data: {
+                roomName: roomName,
+                roomDescription: roomDescription
+            }
+        });
+
+        res.status(200).json({
+            message: 'Room updated successfully',
+            room: updatedRoom
+        });
+    } catch (e) {
+        console.log(`Error updating room: ${e}`);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+}
+
 async function removeUserFromRoom(req, res) {
     try {
         const roomId = parseInt(req.query.userId);
@@ -123,4 +164,4 @@ async function removeUserFromRoom(req, res) {
     }
 }
 
-export {removeUserFromRoom, createRoom};
+export {removeUserFromRoom, createRoom, updateRoom};
