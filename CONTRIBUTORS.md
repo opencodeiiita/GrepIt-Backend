@@ -1,4 +1,7 @@
 # List of Contributors for GrepIt-Backend!
 
-<!-- Format for adding contributor:
-- [Bhupesh Dewangan](https://github.com/bhupesh98) -->
+-   [Vatsal Bhuva](https://github.com/VatsalBhuva11)
+-   [Bhupesh Dewangan](https://github.com/bhupesh98)
+-   [Sagnik Mandal](https://github.com/criticic)
+-   [Apoorv Mittal](https://github.com/Apoorv012)
+
