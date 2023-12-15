@@ -19,8 +19,20 @@ async function generateRoomCode() {
 
 async function createRoom(req, res) {
     try {
+
+        const {roomName} = req.body;
+
+        if (!roomName) {
+            console.log('Error creating room: Room name not provided');
+            res.status(400).json({
+                error: 'Room name not provided'
+            });
+            return;
+        }
+
         const code = await generateRoomCode();
 
+        req.user.isCreator = true;
         const user = await prisma.user.update({
             where: {
                 id: req.user.id
@@ -33,7 +45,7 @@ async function createRoom(req, res) {
         const room = await prisma.room.create({
             data: {
                 code,
-                roomName: req.body.roomName,
+                roomName,
                 questions: {},
                 users: {
                     connect: [{ id: user.id }]
@@ -44,7 +56,7 @@ async function createRoom(req, res) {
         res.status(200).json({
             message: 'Room created successfully',
             code,
-            roomId: room.id
+            roomId: room.roomId
         });
     } catch (e) {
         console.log(`Error creating room: ${e}`);

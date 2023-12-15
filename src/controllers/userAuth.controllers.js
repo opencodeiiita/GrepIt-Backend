@@ -1,5 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../config/db.config.js';
+import jwt from 'jsonwebtoken';
 
 const saltRounds = 10;
 
@@ -32,9 +33,19 @@ async function registerUser(req, res) {
             }
         });
 
+        const data = {
+            user: {
+                id: user.id,
+                isCreator: false,
+                name: user.name,
+            }
+        }
+
+        const token = jwt.sign(data, process.env.JWT_SECRET);
+
         res.status(200).json({
             message: 'User created successfully',
-            user: user
+            token
         });
     } catch (e) {
         console.log(`Error creating user: ${e}`);
@@ -72,14 +83,19 @@ async function loginUser(req, res) {
             return;
         }
 
-        res.status(200).json({
-            message: 'User logged in successfully',
+        const data = {
             user: {
                 id: user.id,
+                isCreator: false,
                 name: user.name,
-                email: user.email,
-                currPoints: user.currPoints,
-            },
+            }
+        }
+
+        const token = jwt.sign(data, process.env.JWT_SECRET);
+
+        res.status(200).json({
+            message: 'User logged in successfully',
+            token
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);

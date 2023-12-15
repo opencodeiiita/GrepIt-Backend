@@ -10,7 +10,7 @@ async function fetchUser(req, res, next) {
     }
 
     try {
-        const data = jwt.verify(token, "grepit-backend");
+        const data = jwt.verify(token, process.env.JWT_SECRET);
         req.user = data.user;
         next();
     } catch (err) {
