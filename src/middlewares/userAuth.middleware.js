@@ -1,22 +1,34 @@
-import jwt from "jsonwebtoken";
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET;
 
-async function fetchUser(req, res, next) {
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(" ")[1];
-
-    if (!token) {
-        res.status(401).send("Please authenticate using a valid token");
-        return;
-    }
-
-    try {
-        const data = jwt.verify(token, "grepit-backend");
-        req.user = data.user;
-        next();
-    } catch (err) {
-        console.error(err);
-        res.status(401).send("Please authenticate using a valid token");
-    }
+function verifyToken(token) {
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return decoded;
+  } catch (error) {
+    throw new Error("Invalid token");
+  }
 }
 
-export { fetchUser };
+function extractPayloadFromToken(decodedToken) {
+  if (decodedToken && decodedToken.userID && decodedToken.userName) {
+    return {id:decodedToken.userId,name:decodedToken.userName,isCreator:decodedToken.isCreator}
+  } else {
+    throw new Error("Invalid or missing user ID and user name in the token");
+  }
+}
+
+function authVerify(req, res, next) {
+  const token = req.headers.authorization;
+
+  try {
+    const decoded = verifyToken(token);
+    const payload = extractPayloadFromToken(decoded);
+    req.user = { ...payload };
+    return next();
+  } catch (error) {
+    return res.status(401).json({ message: "Unauthorised access, please add the token" });
+  }
+}
+
+export { authVerify };
