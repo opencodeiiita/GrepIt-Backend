@@ -20,32 +20,36 @@ async function generateRoomCode() {
 async function createRoom(req, res) {
     try {
         const code = await generateRoomCode();
-
-        const user = await prisma.user.update({
-            where: {
-                id: req.user.id
-            },
-            data: {
-                isCreator: true
-            }
-        });
-
-        const room = await prisma.room.create({
-            data: {
-                code,
-                roomName: req.body.roomName,
-                questions: {},
-                users: {
-                    connect: [{ id: user.id }]
+        let room;
+        const success = await prisma.$transaction(async (tx) => {
+            room = prisma.room.create({
+                data: {
+                    code,
+                    roomName: req.body.roomName,
+                    questions: {},
+                    users: {
+                        connect: [{ id: req.user.id }]
+                    }
                 }
-            }
+            });
+
+            const user = await prisma.user.update({
+                where: {
+                    id: req.user.id
+                },
+                data: {
+                    isCreator: true
+                }
+            });
         });
+
 
         res.status(200).json({
             message: 'Room created successfully',
             code,
             roomId: room.id
         });
+
     } catch (e) {
         console.log(`Error creating room: ${e}`);
         res.status(500).json({
@@ -97,7 +101,7 @@ async function updateRoom(req, res) {
 
 async function removeUserFromRoom(req, res) {
     try {
-        const roomId = parseInt(req.query.userId);
+        const roomId = parseInt(req.query.roomId);
         const userId  = parseInt(req.query.userId);
 
         const room = await prisma.room.findUnique({

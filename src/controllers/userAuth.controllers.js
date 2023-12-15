@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../config/db.config.js';
-
+import jwt from 'jsonwebtoken';
 const saltRounds = 10;
 
 async function registerUser(req, res) {
@@ -72,6 +72,9 @@ async function loginUser(req, res) {
             return;
         }
 
+        const authToken = jwt.sign({id: user.id, name: user.name, isCreator: false}, process.env.JWT_SECRET,{
+            expiresIn: "7d",
+        });
         res.status(200).json({
             message: 'User logged in successfully',
             user: {
@@ -80,6 +83,7 @@ async function loginUser(req, res) {
                 email: user.email,
                 currPoints: user.currPoints,
             },
+            token: authToken
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);

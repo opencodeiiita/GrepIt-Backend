@@ -92,14 +92,16 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
     ├── config
     │   └── db.config.js
     ├── controllers
-    │   └── userAuth.controllers.js
+    │   ├── userAuth.controllers.js
+    │   └── room.controllers.js
     ├── middlewares
     │   └── userAuth.middleware.js
-    ├── models
-    │   └── user.model.js
     └── routes
-        └── v1
-            └── userAuth.routes.js
+        ├── v1
+        │   ├── userAuth.routes.js
+        │   ├── room.routes.js
+        │   └── v1-main.js
+        └── index.routes.js
 
 8 directories, 13 files
 ```
