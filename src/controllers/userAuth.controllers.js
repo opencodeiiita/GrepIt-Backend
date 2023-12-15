@@ -13,7 +13,6 @@ async function registerUser(req, res) {
             }
         });
 
-        console.log(userAlreadyPresent);
         if (userAlreadyPresent) {
             console.log('Error creating user: User already exists in the DB');
             res.status(200).json({
