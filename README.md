@@ -155,7 +155,27 @@ Please help us follow the best practice to make it easy for the reviewer as well
 
 ## 💪 Thanks To All Contributors
 
-All the contributor's github profile image will be displayed here, pick up the best one real quick.  
+All the contributor's github profile image will be displayed here, pick up the best one real quick.
 
-<img src="https://contrib.rocks/image?repo=opencodeiiita/GrepIt-Backend"/>
+<div align="left">
+    <!-- FORMAT TO ADD YOUR ENTRY
+    <a href="https://github.com/<GITHUB_USERNAME>" title="<GITHUB_USERNAME>">
+        <img src="https://github.com/<GITHUB_USERNAME>.png" width="70px" style="border-radius: 50%" alt="<FULL_NAME>">
+    </a>
+    replace <GITHUB_USERNAME> with your GitHub username
+    replace <FULL_NAME> with your full name
+    -->
+    <a href="https://github.com/VatsalBhuva11" title="VatsalBhuva11">
+        <img src="https://github.com/VatsalBhuva11.png" width="70px" alt="Vatsal Bhuva">
+    </a>
+    <a href="https://github.com/bhupesh98" title="bhupesh98">
+        <img src="https://github.com/bhupesh98.png" width="70px" alt="Bhupesh Dewangan">
+    </a>
+    <a href="https://github.com/criticic" title="Sagnik Mandal">
+        <img src="https://github.com/criticic.png" width="70px" alt="Sagnik Mandal">
+    </a>
+    <a href="https://github.com/Apoorv012" title="Apoorv Mittal">
+        <img src="https://github.com/Apoorv012.png" width="70px" alt="Apoorv Mittal">
+    </a>
+</div>
 
