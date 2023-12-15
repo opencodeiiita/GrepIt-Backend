@@ -24,3 +24,39 @@
       }
     }
     ```
+
+
+  - `POST /api/v1/auth/login:` Login as a user.
+    ```json
+    {
+      "email": "test@gmail.com",
+      "password": "test"
+    }
+    ```
+    **Response:**
+    ```json
+    {
+      "message": "User logged in successfully",
+      "user": {
+        "id": 12,
+        "name": "test",
+        "email": "test@gmail.com",
+        "currPoints": 0
+      }
+    }
+    ```
+
+
+- Room Routes:
+  - `POST /api/v1/room/create:` Create a room
+  
+    **Header:**
+    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0`
+
+    **Response:**
+    ```json
+    {
+      "message": "Room created successfully",
+      "code": "z9cdTCAAAn"
+    }
+    ```
