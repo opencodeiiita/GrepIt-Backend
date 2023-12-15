@@ -45,5 +45,49 @@ async function registerUser(req, res) {
     }
 }
 
-export default registerUser;
+async function loginUser(req, res) {
+    try {
+        const { email, password } = req.body;
 
+        const user = await prisma.user.findUnique({
+            where: {
+                email: email
+            },
+        });
+
+        if (!user) {
+            console.log('Error logging in: User does not exist');
+            res.status(200).json({
+                error: 'User does not exist'
+            });
+            return;
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) {
+            console.log('Error logging in: Incorrect password');
+            res.status(401).json({
+                error: 'Incorrect password'
+            });
+            return;
+        }
+
+        res.status(200).json({
+            message: 'User logged in successfully',
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                currPoints: user.currPoints,
+            },
+        });
+    } catch (e) {
+        console.log(`Error logging in: ${e}`);
+        res.status(500).json({
+            error: 'Internal Server Error'
+        });
+    }
+}
+
+export { registerUser, loginUser };
