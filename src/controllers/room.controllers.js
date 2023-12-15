@@ -54,7 +54,7 @@ async function createRoom(req, res) {
 
 async function removeUserFromRoom(req, res) {
     try {
-        const { roomId} = req.body;
+        const { roomId, userId } = req.body;
 
         const room = await prisma.room.findUnique({
             where: {
@@ -75,7 +75,7 @@ async function removeUserFromRoom(req, res) {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: req.user.id
+                id: userId
             }
         });
 
