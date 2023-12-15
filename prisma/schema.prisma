@@ -48,6 +48,8 @@ model Option {
 
 model Room {
     roomId    Int        @id @default(autoincrement())
+    roomName  String
+    roomDescription String?
     code      String     @unique
     questions Question[] @relation("RoomToQuestions")
     users     User[]
