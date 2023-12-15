@@ -5,6 +5,6 @@ import { fetchUser } from '../../middlewares/userAuth.middleware.js';
 const roomRouter = express.Router();
 
 roomRouter.route('/create').post(fetchUser, createRoom);
-roomRouter.route("/user/delete").post(removeUserFromRoom);
+roomRouter.route("/user/delete").post(fetchUser, removeUserFromRoom);
 
 export default roomRouter;

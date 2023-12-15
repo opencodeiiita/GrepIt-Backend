@@ -33,6 +33,7 @@ async function createRoom(req, res) {
         const room = await prisma.room.create({
             data: {
                 code,
+                roomName: req.body.roomName,
                 questions: {},
                 users: {
                     connect: [{ id: user.id }]
@@ -42,7 +43,8 @@ async function createRoom(req, res) {
 
         res.status(200).json({
             message: 'Room created successfully',
-            code
+            code,
+            roomId: room.id
         });
     } catch (e) {
         console.log(`Error creating room: ${e}`);
@@ -54,11 +56,12 @@ async function createRoom(req, res) {
 
 async function removeUserFromRoom(req, res) {
     try {
-        const { roomId, userId } = req.body;
+        const roomId = parseInt(req.query.userId);
+        const userId  = parseInt(req.query.userId);
 
         const room = await prisma.room.findUnique({
             where: {
-                id: roomId
+                roomId: Number(roomId)
             },
             include: {
                 users: true
@@ -67,7 +70,7 @@ async function removeUserFromRoom(req, res) {
 
         if (!room) {
             console.log('Error removing user from room: Room does not exist');
-            res.status(200).json({
+            res.status(400).json({
                 error: 'Room does not exist'
             });
             return;
@@ -75,10 +78,9 @@ async function removeUserFromRoom(req, res) {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId
+                id: Number(userId)
             }
         });
-
         if (!user) {
             console.log('Error removing user from room: User does not exist');
             res.status(400).json({
@@ -87,7 +89,7 @@ async function removeUserFromRoom(req, res) {
             return;
         }
 
-        const userInRoom = room.users.find((user) => user.id === userId);
+        const userInRoom = room.users.find((user) => user.id == Number(userId));
         if (!userInRoom) {
             console.log('Error removing user from room: User is not in the room');
             res.status(400).json({
@@ -98,12 +100,12 @@ async function removeUserFromRoom(req, res) {
 
         const updatedRoom = await prisma.room.update({
             where: {
-                id: roomId
+                roomId: Number(roomId)
             },
             data: {
                 users: {
                     disconnect: {
-                        id: userId
+                        id: Number(userId)
                     }
                 }
             }
