@@ -1,5 +1,6 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
+import { response_200, response_500 } from '../utils/responseCodes.js';
 
 async function generateRoomCode() {
     let code = Randomstring.generate(10);
@@ -41,16 +42,10 @@ async function createRoom(req, res) {
             }
         });
 
-        res.status(200).json({
-            message: 'Room created successfully',
-            code,
-            roomId: room.id
-        });
+        response_200(res,'Room created successfully',room);
     } catch (e) {
-        console.log(`Error creating room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error creating room: ${e}`);
+        response_500(res,'Error creating room:',e);
     }
 }
 
@@ -83,15 +78,10 @@ async function updateRoom(req, res) {
             }
         });
 
-        res.status(200).json({
-            message: 'Room updated successfully',
-            room: updatedRoom
-        });
+        response_200(res,'Room updated successfully',updatedRoom);
     } catch (e) {
-        console.log(`Error updating room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error updating room: ${e}`);
+        response_500(res,`Error updating room`,e);
     }
 }
 
@@ -151,16 +141,10 @@ async function removeUserFromRoom(req, res) {
                 }
             }
         });
-
-        res.status(200).json({
-            message: 'User removed from room successfully',
-            room: updatedRoom
-        });
+        response_200(res,'User removed from room successfully',updatedRoom);
     } catch (e) {
-        console.log(`Error removing user from room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error removing user from room: ${e}`);
+        response_500(res,`Error removing user from room`,e);
     }
 }
 

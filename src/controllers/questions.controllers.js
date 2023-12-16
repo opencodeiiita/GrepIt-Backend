@@ -1,4 +1,5 @@
 import prisma from '../config/db.config.js';
+import { response_200, response_500 } from '../utils/responseCodes.js';
 
 async function addMultipleChoiceQuestion(req, res) {
     try {
@@ -24,15 +25,10 @@ async function addMultipleChoiceQuestion(req, res) {
             }
         });
 
-        res.status(200).json({
-            message: 'Question added successfully',
-            question: newQuestion
-        });
+        response_200(res,'Question added successfully',newQuestion);
     } catch (error) {
         console.error(`Error adding question: ${error}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        response_500(res,'Error adding question',error);
     }
 }
 
