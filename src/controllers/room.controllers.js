@@ -148,4 +148,73 @@ async function removeUserFromRoom(req, res) {
     }
 }
 
-export {removeUserFromRoom, createRoom, updateRoom};
+async function addUserToRoom(req, res) {
+    try {
+        const roomCode = req.query.roomCode;
+        const userId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode,
+
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            console.log('Error adding user to room: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            console.log('Error adding user to room: User does not exist');
+            res.status(400).json({
+                error: 'User does not exist'
+            });
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == userId);
+        if (userInRoom) {
+            console.log('Error adding user to room: User is already in the room');
+            res.status(400).json({
+                error: 'User is already in the room'
+            });
+            return;
+        }
+
+        const updatedRoom = await prisma.room.update({
+            where: {
+                code: roomCode
+            },
+            data: {
+                users: {
+                    connect: {
+                        id: userId
+                    }
+                }
+            }
+        });
+        response_200(res,'User added to room successfully',updatedRoom);
+    } catch (e) {
+        console.error(`Error adding user to room: ${e}`);
+        response_500(res,`Error adding user to room`,e);
+    }
+}
+
+export {
+    removeUserFromRoom,
+    addUserToRoom,
+    createRoom,
+    updateRoom
+};
