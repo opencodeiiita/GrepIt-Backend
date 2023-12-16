@@ -6,6 +6,7 @@ import {
     response_404,
     response_500
 } from '../utils/responseCodes.js';
+import jwt from "jsonwebtoken";
 
 const saltRounds = 10;
 
@@ -64,11 +65,18 @@ async function loginUser(req, res) {
             return response_401(res, 'Unauthorized User');
         }
 
+        const token = jwt.sign({ 
+            id: user.id,
+            isCreator: false,
+            name: user.name
+        }, process.env.JWT_SECRET);
+
         response_200(res,'User logged in successfully',{
             id: user.id,
             name: user.name,
             email: user.email,
-            currPoints: user.currPoints
+            currPoints: user.currPoints,
+            token: token
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);

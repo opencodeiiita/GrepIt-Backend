@@ -80,28 +80,34 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
 ```bash
 .
 ├── API_ENDPOINTS.md
-├── app.js
 ├── CONTRIBUTORS.md
 ├── LICENSE
-├── package.json
-├── package-lock.json
-├── prisma
-│   └── schema.prisma
 ├── README.md
+├── app.js
+├── package-lock.json
+├── package.json
+├── prisma
+│   └── schema.prisma
 └── src
     ├── config
-    │   └── db.config.js
+    │   └── db.config.js
     ├── controllers
-    │   └── userAuth.controllers.js
+    │   ├── questions.controllers.js
+    │   ├── room.controllers.js
+    │   └── userAuth.controllers.js
     ├── middlewares
-    │   └── userAuth.middleware.js
-    ├── models
-    │   └── user.model.js
-    └── routes
-        └── v1
-            └── userAuth.routes.js
+    │   └── userAuth.middleware.js
+    ├── routes
+    │   ├── index.routes.js
+    │   └── v1
+    │       ├── questions.routes.js
+    │       ├── room.routes.js
+    │       ├── userAuth.routes.js
+    │       └── v1-main.js
+    └── utils
+        └── responseCodes.js
 
-8 directories, 13 files
+34 directories, 20 files
 ```
 
 > [!NOTE]
