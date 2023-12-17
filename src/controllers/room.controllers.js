@@ -247,7 +247,7 @@ async function addUserToRoom(req, res) {
 async function disconnectUserFromRoom(req, res) {
     try {
         const roomId = parseInt(req.query.roomId);
-        const userId = parseInt(req.query.userId);
+        const userId = req.user.id;
 
         const room = await prisma.room.findUnique({
             where: {
