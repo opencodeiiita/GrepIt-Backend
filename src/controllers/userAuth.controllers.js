@@ -6,6 +6,9 @@ import {
     response_404,
     response_500
 } from '../utils/responseCodes.js';
+import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 const saltRounds = 10;
 
@@ -35,7 +38,12 @@ async function registerUser(req, res) {
             }
         });
 
-        response_200(res, 'User created successfully', user);
+        const token = jwt.sign({userID:user.id,userName:user.name,isCreator:false},JWT_SECRET,{expiresIn:'2d'})
+
+        response_200(res,'User created successfully',{
+            user: user,
+            token:token
+        });
     } catch (e) {
         console.error(`Error creating user: ${e}`);
         response_500(res, 'Error creating user', e);
@@ -64,11 +72,16 @@ async function loginUser(req, res) {
             return response_401(res, 'Unauthorized User');
         }
 
+        const token = jwt.sign({userID:user.id,userName:user.name,isCreator:user.isCreator},JWT_SECRET,{expiresIn:'2d'})
+
         response_200(res,'User logged in successfully',{
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            currPoints: user.currPoints
+            user: {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                currPoints: user.currPoints,
+                token:token
+            },
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);

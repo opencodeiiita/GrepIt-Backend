@@ -5,13 +5,13 @@ import {
     updateRoom,
     addUserToRoom 
 } from '../../controllers/room.controllers.js';
-import { fetchUser } from '../../middlewares/userAuth.middleware.js';
+import { authVerify } from '../../middlewares/userAuth.middleware.js';
 
 const roomRouter = express.Router();
 
-roomRouter.route('/create').post(fetchUser, createRoom);
-roomRouter.route("/user/delete").post(fetchUser, removeUserFromRoom);
-roomRouter.route('/update').patch(fetchUser, updateRoom);
-roomRouter.route('/user/add').post(fetchUser, addUserToRoom);
+roomRouter.route('/create').post(authVerify, createRoom);
+roomRouter.route("/user/delete").post(authVerify, removeUserFromRoom);
+roomRouter.route('/update').patch(authVerify, updateRoom);
+roomRouter.route('/user/add').post(authVerify, addUserToRoom);
 
 export default roomRouter;

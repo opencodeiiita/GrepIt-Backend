@@ -20,7 +20,8 @@
           "email": "test@gmail.com",
           "password": "$2b$10$msMc.7.QkYIu3/7i/JTQD.na7Nwq2MfMYpuWrgdWuZuHwWfncr9MW",
           "currPoints": 0,
-          "userRoomId": null
+          "userRoomId": null,
+          "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjUsInVzZXJOYW1lIjoid2FkYWQiLCJpc0NyZWF0b3IiOnRydWUsImlhdCI6MTcwMjY3ODgzNSwiZXhwIjoxNzAyODUxNjM1fQ.JeMgwc7aMYSg1UyTCqGLkKf2Re8HxIqJ0y5On5VtWSM"
       }
     }
     ```
@@ -41,7 +42,8 @@
         "id": 12,
         "name": "test",
         "email": "test@gmail.com",
-        "currPoints": 0
+        "currPoints": 0,
+        "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjUsInVzZXJOYW1lIjoid2FkYWQiLCJpc0NyZWF0b3IiOnRydWUsImlhdCI6MTcwMjY3ODgzNSwiZXhwIjoxNzAyODUxNjM1fQ.JeMgwc7aMYSg1UyTCqGLkKf2Re8HxIqJ0y5On5VtWSM"
       }
     }
     ```
@@ -51,12 +53,13 @@
   - `POST /api/v1/room/create:` Create a room
   
     **Header:**
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0`
+    authorization: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0"
 
     **Response:**
     ```json
     {
       "message": "Room created successfully",
-      "code": "z9cdTCAAAn"
+      "code": "z9cdTCAAAn",
+      "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjUsInVzZXJOYW1lIjoid2FkYWQiLCJpc0NyZWF0b3IiOnRydWUsImlhdCI6MTcwMjY3ODgzNSwiZXhwIjoxNzAyODUxNjM1fQ.JeMgwc7aMYSg1UyTCqGLkKf2Re8HxIqJ0y5On5VtWSM"
     }
     ```

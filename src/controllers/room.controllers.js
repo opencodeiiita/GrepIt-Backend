@@ -1,6 +1,8 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
 import { response_200, response_500 } from '../utils/responseCodes.js';
+import jwt from 'jsonwebtoken';
+const JWT_SECRET = process.env.JWT_SECRET;
 
 async function generateRoomCode() {
     let code = Randomstring.generate(10);
@@ -22,6 +24,16 @@ async function createRoom(req, res) {
     try {
         const code = await generateRoomCode();
 
+        const room = await prisma.room.create({
+            data: {
+                ...req.body,
+                code,
+                users: {
+                    connect: [{ id: req.user.id }]
+                }
+            }
+        });
+
         const user = await prisma.user.update({
             where: {
                 id: req.user.id
@@ -31,18 +43,13 @@ async function createRoom(req, res) {
             }
         });
 
-        const room = await prisma.room.create({
-            data: {
-                code,
-                roomName: req.body.roomName,
-                questions: {},
-                users: {
-                    connect: [{ id: user.id }]
-                }
-            }
-        });
+        const token = jwt.sign({userID:user.id,userName:user.name,isCreator:true},JWT_SECRET,{expiresIn:'2d'})
 
-        response_200(res,'Room created successfully',room);
+        response_200(res,'Room created successfully',{
+            code,
+            roomId: room.id,
+            token:token
+        });
     } catch (e) {
         console.error(`Error creating room: ${e}`);
         response_500(res,'Error creating room:',e);
@@ -87,7 +94,7 @@ async function updateRoom(req, res) {
 
 async function removeUserFromRoom(req, res) {
     try {
-        const roomId = parseInt(req.query.userId);
+        const roomId = parseInt(req.query.roomId);
         const userId  = parseInt(req.query.userId);
 
         const room = await prisma.room.findUnique({
