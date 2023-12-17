@@ -1,5 +1,6 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
+import { response_200, response_500 } from '../utils/responseCodes.js';
 import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -51,10 +52,8 @@ async function createRoom(req, res) {
             token:token
         });
     } catch (e) {
-        console.log(`Error creating room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error creating room: ${e}`);
+        response_500(res,'Error creating room:',e);
     }
 }
 
@@ -87,15 +86,10 @@ async function updateRoom(req, res) {
             }
         });
 
-        res.status(200).json({
-            message: 'Room updated successfully',
-            room: updatedRoom
-        });
+        response_200(res,'Room updated successfully',updatedRoom);
     } catch (e) {
-        console.log(`Error updating room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error updating room: ${e}`);
+        response_500(res,`Error updating room`,e);
     }
 }
 
@@ -155,17 +149,80 @@ async function removeUserFromRoom(req, res) {
                 }
             }
         });
-
-        res.status(200).json({
-            message: 'User removed from room successfully',
-            room: updatedRoom
-        });
+        response_200(res,'User removed from room successfully',updatedRoom);
     } catch (e) {
-        console.log(`Error removing user from room: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error removing user from room: ${e}`);
+        response_500(res,`Error removing user from room`,e);
     }
 }
 
-export {removeUserFromRoom, createRoom, updateRoom};
+async function addUserToRoom(req, res) {
+    try {
+        const roomCode = req.query.roomCode;
+        const userId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode,
+
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            console.log('Error adding user to room: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            console.log('Error adding user to room: User does not exist');
+            res.status(400).json({
+                error: 'User does not exist'
+            });
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == userId);
+        if (userInRoom) {
+            console.log('Error adding user to room: User is already in the room');
+            res.status(400).json({
+                error: 'User is already in the room'
+            });
+            return;
+        }
+
+        const updatedRoom = await prisma.room.update({
+            where: {
+                code: roomCode
+            },
+            data: {
+                users: {
+                    connect: {
+                        id: userId
+                    }
+                }
+            }
+        });
+        response_200(res,'User added to room successfully',updatedRoom);
+    } catch (e) {
+        console.error(`Error adding user to room: ${e}`);
+        response_500(res,`Error adding user to room`,e);
+    }
+}
+
+export {
+    removeUserFromRoom,
+    addUserToRoom,
+    createRoom,
+    updateRoom
+};
