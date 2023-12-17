@@ -1,12 +1,24 @@
 import prisma from '../config/db.config.js';
-import { response_200, response_500 } from '../utils/responseCodes.js';
+import { response_200, response_400, response_500 } from '../utils/responseCodes.js';
 
 async function addMultipleChoiceQuestion(req, res) {
     try {
         const  question = req.body.question;
         const options = req.body.options;
         const roomId = req.params.roomId;
+        const userId = req.userId;
 
+        const exists = await prisma.user.findUnique({
+            where: {
+                userRoomId: roomId,
+                id: userId
+            }
+        });
+
+        if(!exists)
+        {
+            return response_400(res, "Room doesn't exist");
+        }
         const newQuestion = await prisma.question.create({
             data: {
                 question,

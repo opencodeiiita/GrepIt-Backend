@@ -103,7 +103,7 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
         │   └── v1-main.js
         └── index.routes.js
 
-8 directories, 13 files
+8 directories, 16 files
 ```
 
 > [!NOTE]

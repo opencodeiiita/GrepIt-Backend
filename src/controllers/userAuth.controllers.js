@@ -1,12 +1,19 @@
 import bcrypt from 'bcrypt';
 import prisma from '../config/db.config.js';
+import jwt from 'jsonwebtoken';
+import {
+    response_200,
+    response_401,
+    response_404,
+    response_500
+} from '../utils/responseCodes.js';
 
 const saltRounds = 10;
 
 async function registerUser(req, res) {
     try {
         const { name, email, password } = req.body;
-
+       
         const userAlreadyPresent = await prisma.user.findUnique({
             where: {
                 email: email
@@ -20,7 +27,9 @@ async function registerUser(req, res) {
 
         const salt = await bcrypt.genSalt(saltRounds);
         const secPass = await bcrypt.hash(password, salt);
-
+        const authToken = jwt.sign({id: user.id, name: user.name, isCreator: false}, process.env.JWT_SECRET,{
+            expiresIn: "7d",
+        });
         const user = await prisma.user.create({
             data: {
                 name,
@@ -29,7 +38,10 @@ async function registerUser(req, res) {
             }
         });
 
-        response_200(res, 'User created successfully', user);
+        response_200(res, 'User created successfully', {
+            "user" : user,
+            "token" : authToken
+        });
     } catch (e) {
         console.error(`Error creating user: ${e}`);
         response_500(res, 'Error creating user', e);
@@ -58,6 +70,9 @@ async function loginUser(req, res) {
             return response_401(res, 'Unauthorized User');
         }
 
+        const authToken = jwt.sign({id: user.id, name: user.name, isCreator: false}, process.env.JWT_SECRET,{
+            expiresIn: "7d",
+        });
         res.status(200).json({
             message: 'User logged in successfully',
             user: {
@@ -66,6 +81,7 @@ async function loginUser(req, res) {
                 email: user.email,
                 currPoints: user.currPoints,
             },
+            token: authToken
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);

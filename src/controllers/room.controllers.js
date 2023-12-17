@@ -44,7 +44,16 @@ async function createRoom(req, res) {
             });
         });
 
-        return response_200(res,'Room created successfully',room);
+        const upgraded_token = jwt.sign({id: req.user.id, name: req.user.name, isCreator: true}, process.env.JWT_SECRET,{
+            expiresIn: "7d",
+        });
+
+        return response_200(res,'Room created successfully',
+        {
+            "room" : room,
+            "token" : upgraded_token
+        
+        });
     } catch (e) {
         console.error(`Error creating room: ${e}`);
         return response_500(res,'Error creating room:',e);
