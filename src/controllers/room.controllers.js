@@ -1,6 +1,6 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
-import { response_200, response_500 } from '../utils/responseCodes.js';
+import { response_200, response_400, response_403, response_404, response_500 } from '../utils/responseCodes.js';
 import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET;
 
@@ -79,6 +79,12 @@ async function updateRoom(req, res) {
             return;
         }
 
+        if (room.creatorId !== req.user.id) { 
+            console.log('Error updating room: User is not the creator of the room');
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
         const updatedRoom = await prisma.room.update({
             where: {
                 roomId: Number(roomId)
@@ -115,6 +121,12 @@ async function removeUserFromRoom(req, res) {
             res.status(400).json({
                 error: 'Room does not exist'
             });
+            return;
+        }
+
+        if (room.creatorId !== req.user.id) {
+            console.log("Error removing user from room: User is not the creator of the room");
+            response_403(res, "User is not the creator of the room");
             return;
         }
 
@@ -183,6 +195,12 @@ async function addUserToRoom(req, res) {
             return;
         }
 
+        if (room.creatorId !== req.user.id) {
+            console.log("Error removing user from room: User is not the creator of the room");
+            response_403(res, "User is not the creator of the room");
+            return;
+        }
+
         const user = await prisma.user.findUnique({
             where: {
                 id: userId
@@ -226,5 +244,70 @@ async function addUserToRoom(req, res) {
     }
 }
 
-export { removeUserFromRoom, addUserToRoom, createRoom, updateRoom };
+async function disconnectUserFromRoom(req, res) {
+    try {
+        const roomId = parseInt(req.query.roomId);
+        const userId = parseInt(req.query.userId);
+
+        const room = await prisma.room.findUnique({
+            where: {
+                roomId: roomId
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            console.log('Error removing user from room: Room does not exist');
+            response_404(res, 'Room does not exist');
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            console.log('Error removing user from room: User does not exist');
+            response_404(res, 'User does not exist');
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == Number(userId));
+        if (!userInRoom) {
+            console.log(
+                'Error removing user from room: User is not in the room'
+            );
+            response_400(res, 'User is not in the room');
+            return;
+        }
+
+        const updatedRoom = await prisma.room.update({
+            where: {
+                roomId: roomId
+            },
+            data: {
+                users: {
+                    disconnect: {
+                        id: userId
+                    }
+                }
+            }
+        });
+        response_200(res, 'User removed from room successfully', updatedRoom);
+    } catch (e) {
+        console.error(`Error removing user from room: ${e}`);
+        response_500(res, `Error removing user from room`, e);
+    }
+}
+
+export {
+    removeUserFromRoom,
+    addUserToRoom,
+    createRoom,
+    updateRoom,
+    disconnectUserFromRoom
+};
 
