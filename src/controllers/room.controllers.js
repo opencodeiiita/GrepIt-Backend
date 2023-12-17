@@ -1,6 +1,7 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
 import { response_200, response_500 } from '../utils/responseCodes.js';
+import jwt from "jsonwebtoken";
 
 async function generateRoomCode() {
     let code = Randomstring.generate(10);
@@ -42,7 +43,21 @@ async function createRoom(req, res) {
             }
         });
 
-        response_200(res,'Room created successfully',room);
+        const token = jwt.sign({
+            id: user.id,
+            isCreator: true,
+            name: user.name
+        }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+        response_200(res,'Room created successfully', {
+            id: room.roomId,
+            code: room.code,
+            roomName: room.roomName,
+            questions: room.questions,
+            users: room.users,
+            token: token
+        
+        });
     } catch (e) {
         console.error(`Error creating room: ${e}`);
         response_500(res,'Error creating room:',e);
@@ -200,7 +215,8 @@ async function addUserToRoom(req, res) {
             data: {
                 users: {
                     connect: {
-                        id: userId
+                        id: userId,
+                        isCreator: false,
                     }
                 }
             }
