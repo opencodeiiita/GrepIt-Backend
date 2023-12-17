@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import prisma from '../config/db.config.js';
-import jwt from 'jsonwebtoken';
+
 const saltRounds = 10;
 
 async function registerUser(req, res) {
@@ -15,10 +15,7 @@ async function registerUser(req, res) {
 
         if (userAlreadyPresent) {
             console.log('Error creating user: User already exists in the DB');
-            res.status(200).json({
-                error: 'User already exists in the DB'
-            });
-            return;
+            response_200(res,'User already exists in the DB');
         }
 
         const salt = await bcrypt.genSalt(saltRounds);
@@ -32,15 +29,10 @@ async function registerUser(req, res) {
             }
         });
 
-        res.status(200).json({
-            message: 'User created successfully',
-            user: user
-        });
+        response_200(res, 'User created successfully', user);
     } catch (e) {
-        console.log(`Error creating user: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        console.error(`Error creating user: ${e}`);
+        response_500(res, 'Error creating user', e);
     }
 }
 
@@ -51,30 +43,21 @@ async function loginUser(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 email: email
-            },
+            }
         });
 
         if (!user) {
             console.log('Error logging in: User does not exist');
-            res.status(200).json({
-                error: 'User does not exist'
-            });
-            return;
+            return response_404(res, 'User does not exist');
         }
 
         const isMatch = await bcrypt.compare(password, user.password);
 
         if (!isMatch) {
             console.log('Error logging in: Incorrect password');
-            res.status(401).json({
-                error: 'Incorrect password'
-            });
-            return;
+            return response_401(res, 'Unauthorized User');
         }
 
-        const authToken = jwt.sign({id: user.id, name: user.name, isCreator: false}, process.env.JWT_SECRET,{
-            expiresIn: "7d",
-        });
         res.status(200).json({
             message: 'User logged in successfully',
             user: {
@@ -83,13 +66,10 @@ async function loginUser(req, res) {
                 email: user.email,
                 currPoints: user.currPoints,
             },
-            token: authToken
         });
     } catch (e) {
         console.log(`Error logging in: ${e}`);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
+        response_500(res,'Error logging in',e);
     }
 }
 
