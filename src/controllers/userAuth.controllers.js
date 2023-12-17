@@ -35,8 +35,19 @@ async function registerUser(req, res) {
                 password: secPass
             }
         });
+        const token = jwt.sign({ 
+            id: user.id,
+            isCreator: false,
+            name: user.name
+        }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
-        response_200(res, 'User created successfully', user);
+        response_200(res, 'User created successfully', {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            currPoints: user.currPoints,
+            token: token
+        });
     } catch (e) {
         console.error(`Error creating user: ${e}`);
         response_500(res, 'Error creating user', e);
@@ -69,7 +80,7 @@ async function loginUser(req, res) {
             id: user.id,
             isCreator: false,
             name: user.name
-        }, process.env.JWT_SECRET);
+        }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         response_200(res,'User logged in successfully',{
             id: user.id,
