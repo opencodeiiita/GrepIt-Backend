@@ -40,8 +40,7 @@ async function registerUser(req, res) {
 
         const token = jwt.sign({userID:user.id,userName:user.name,isCreator:false},JWT_SECRET,{expiresIn:'2d'})
 
-        res.status(200).json({
-            message: 'User created successfully',
+        response_200(res,'User created successfully',{
             user: user,
             token:token
         });
@@ -75,8 +74,7 @@ async function loginUser(req, res) {
 
         const token = jwt.sign({userID:user.id,userName:user.name,isCreator:user.isCreator},JWT_SECRET,{expiresIn:'2d'})
 
-        res.status(200).json({
-            message: 'User logged in successfully',
+        response_200(res,'User logged in successfully',{
             user: {
                 id: user.id,
                 name: user.name,

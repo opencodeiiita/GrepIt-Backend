@@ -45,8 +45,7 @@ async function createRoom(req, res) {
 
         const token = jwt.sign({userID:user.id,userName:user.name,isCreator:true},JWT_SECRET,{expiresIn:'2d'})
 
-        res.status(200).json({
-            message: 'Room created successfully',
+        response_200(res,'Room created successfully',{
             code,
             roomId: room.id,
             token:token
