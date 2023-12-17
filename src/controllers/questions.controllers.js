@@ -3,7 +3,7 @@ import { response_200, response_500 } from '../utils/responseCodes.js';
 
 async function addMultipleChoiceQuestion(req, res) {
     try {
-        const  question = req.body.question;
+        const question = req.body.question;
         const options = req.body.options;
         const roomId = req.params.roomId;
 
@@ -13,7 +13,7 @@ async function addMultipleChoiceQuestion(req, res) {
                 roomId: Number(roomId),
                 options: {
                     createMany: {
-                        data: options.map(option => ({
+                        data: options.map((option) => ({
                             option: option.option,
                             isCorrect: option.isCorrect
                         }))
@@ -25,10 +25,10 @@ async function addMultipleChoiceQuestion(req, res) {
             }
         });
 
-        response_200(res,'Question added successfully',newQuestion);
+        response_200(res, 'Question added successfully', newQuestion);
     } catch (error) {
         console.error(`Error adding question: ${error}`);
-        response_500(res,'Error adding question',error);
+        response_500(res, 'Error adding question', error);
     }
 }
 

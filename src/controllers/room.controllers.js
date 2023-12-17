@@ -43,16 +43,20 @@ async function createRoom(req, res) {
             }
         });
 
-        const token = jwt.sign({userID:user.id,userName:user.name,isCreator:true},JWT_SECRET,{expiresIn:'2d'})
+        const token = jwt.sign(
+            { userID: user.id, userName: user.name, isCreator: true },
+            JWT_SECRET,
+            { expiresIn: '2d' }
+        );
 
-        response_200(res,'Room created successfully',{
+        response_200(res, 'Room created successfully', {
             code,
             roomId: room.id,
-            token:token
+            token: token
         });
     } catch (e) {
         console.error(`Error creating room: ${e}`);
-        response_500(res,'Error creating room:',e);
+        response_500(res, 'Error creating room:', e);
     }
 }
 
@@ -85,17 +89,17 @@ async function updateRoom(req, res) {
             }
         });
 
-        response_200(res,'Room updated successfully',updatedRoom);
+        response_200(res, 'Room updated successfully', updatedRoom);
     } catch (e) {
         console.error(`Error updating room: ${e}`);
-        response_500(res,`Error updating room`,e);
+        response_500(res, `Error updating room`, e);
     }
 }
 
 async function removeUserFromRoom(req, res) {
     try {
         const roomId = parseInt(req.query.roomId);
-        const userId  = parseInt(req.query.userId);
+        const userId = parseInt(req.query.userId);
 
         const room = await prisma.room.findUnique({
             where: {
@@ -129,7 +133,9 @@ async function removeUserFromRoom(req, res) {
 
         const userInRoom = room.users.find((user) => user.id == Number(userId));
         if (!userInRoom) {
-            console.log('Error removing user from room: User is not in the room');
+            console.log(
+                'Error removing user from room: User is not in the room'
+            );
             res.status(400).json({
                 error: 'User is not in the room'
             });
@@ -148,10 +154,10 @@ async function removeUserFromRoom(req, res) {
                 }
             }
         });
-        response_200(res,'User removed from room successfully',updatedRoom);
+        response_200(res, 'User removed from room successfully', updatedRoom);
     } catch (e) {
         console.error(`Error removing user from room: ${e}`);
-        response_500(res,`Error removing user from room`,e);
+        response_500(res, `Error removing user from room`, e);
     }
 }
 
@@ -162,8 +168,7 @@ async function addUserToRoom(req, res) {
 
         const room = await prisma.room.findUnique({
             where: {
-                code: roomCode,
-
+                code: roomCode
             },
             include: {
                 users: true
@@ -193,7 +198,9 @@ async function addUserToRoom(req, res) {
 
         const userInRoom = room.users.find((user) => user.id == userId);
         if (userInRoom) {
-            console.log('Error adding user to room: User is already in the room');
+            console.log(
+                'Error adding user to room: User is already in the room'
+            );
             res.status(400).json({
                 error: 'User is already in the room'
             });
@@ -212,16 +219,12 @@ async function addUserToRoom(req, res) {
                 }
             }
         });
-        response_200(res,'User added to room successfully',updatedRoom);
+        response_200(res, 'User added to room successfully', updatedRoom);
     } catch (e) {
         console.error(`Error adding user to room: ${e}`);
-        response_500(res,`Error adding user to room`,e);
+        response_500(res, `Error adding user to room`, e);
     }
 }
 
-export {
-    removeUserFromRoom,
-    addUserToRoom,
-    createRoom,
-    updateRoom
-};
+export { removeUserFromRoom, addUserToRoom, createRoom, updateRoom };
+
