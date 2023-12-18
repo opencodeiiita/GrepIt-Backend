@@ -86,22 +86,29 @@ Update the `API_ENDPOINTS.md` file as you write/complete a controller function.
 ├── package.json
 ├── package-lock.json
 ├── prisma
-│   └── schema.prisma
+│   └── schema.prisma
 ├── README.md
 └── src
     ├── config
-    │   └── db.config.js
+    │   └── db.config.js
     ├── controllers
-    │   └── userAuth.controllers.js
+    │   ├── questions.controllers.js
+    │   ├── room.controllers.js
+    │   └── userAuth.controllers.js
     ├── middlewares
-    │   └── userAuth.middleware.js
-    ├── models
-    │   └── user.model.js
-    └── routes
-        └── v1
-            └── userAuth.routes.js
+    │   └── userAuth.middleware.js
+    ├── routes
+    │   ├── index.routes.js
+    │   └── v1
+    │       ├── questions.routes.js
+    │       ├── room.routes.js
+    │       ├── userAuth.routes.js
+    │       └── v1-main.js
+    └── utils
+        └── responseCodes.js
 
-8 directories, 13 files
+8 directories, 19 files
+
 ```
 
 > [!NOTE]
@@ -176,6 +183,9 @@ All the contributor's github profile image will be displayed here, pick up the b
     </a>
     <a href="https://github.com/Apoorv012" title="Apoorv Mittal">
         <img src="https://github.com/Apoorv012.png" width="70px" alt="Apoorv Mittal">
+    </a>
+    <a href="https://github.com/WadadParker" title="Wadad Parker">
+        <img src="https://github.com/WadadParker.png" width="70px" alt="Wadad Parker">
     </a>
 </div>
 
