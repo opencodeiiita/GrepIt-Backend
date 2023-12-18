@@ -78,7 +78,7 @@
     - `POST /api/v1/room/announce` Announce in a room
     ```json
     {
-      "roomId": 1,
+      "code": 1,
       "message": "Hello World"
     }
     ```
