@@ -8,6 +8,7 @@ import {
     disconnectUserFromRoom,
     acceptOrRejectPendingUser
 } from '../../controllers/room.controllers.js';
+import { announce } from '../../controllers/announce.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 import prisma from '../../config/db.config.js';
 
@@ -35,6 +36,8 @@ roomRouter.delete('/delete/:code', async (req, res) => {
     });
     return res.status(200).send('Room deleted');
 });
+
+roomRouter.post("/announce", announce);
 
 export default roomRouter;
 
