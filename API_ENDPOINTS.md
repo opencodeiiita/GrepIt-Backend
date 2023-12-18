@@ -63,3 +63,15 @@
       "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjUsInVzZXJOYW1lIjoid2FkYWQiLCJpc0NyZWF0b3IiOnRydWUsImlhdCI6MTcwMjY3ODgzNSwiZXhwIjoxNzAyODUxNjM1fQ.JeMgwc7aMYSg1UyTCqGLkKf2Re8HxIqJ0y5On5VtWSM"
     }
     ```
+  - `POST /api/v1/room/user/pending?roomId=<roomID>&userId=<userId>&action=<accept/reject>` Accept/Reject Pending Users
+
+    **Header**
+    Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+
+    **Response**
+    ```json
+    {
+      "status": "OK",
+      "message": "User accepted successfully"
+    }
+    ```
