@@ -1,10 +1,15 @@
 import Randomstring from 'randomstring';
 import prisma from '../config/db.config.js';
-import { response_200, response_400, response_403, response_404, response_500 } from '../utils/responseCodes.js';
+import {
+    response_200,
+    response_400,
+    response_403,
+    response_404,
+    response_500
+} from '../utils/responseCodes.js';
 import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET;
 import { io } from '../../app.js';
-
 
 async function generateRoomCode() {
     let code = Randomstring.generate(10);
@@ -28,8 +33,8 @@ async function createRoom(req, res) {
 
         const room = await prisma.room.create({
             data: {
-                roomName : req.body.roomName,
-                roomDescription : req.body.roomDescription,
+                roomName: req.body.roomName,
+                roomDescription: req.body.roomDescription,
                 code,
                 users: {
                     connect: [{ id: req.user.id }]
@@ -52,27 +57,22 @@ async function createRoom(req, res) {
             { expiresIn: '2d' }
         );
 
-
         const sockets = await io.fetchSockets();
 
-        for(const socket of sockets)
-        {
+        for (const socket of sockets) {
             console.log(socket.handshake.query);
-            if(socket.handshake.query.id ==  req.user.id)
-            {
+            if (socket.handshake.query.id == req.user.id) {
                 socket.join(code);
-                socket.emit("room joined", code);
+                socket.emit('room joined', code);
                 break;
             }
         }
-
 
         return response_200(res, 'Room created successfully', {
             code,
             room: room,
             token: token
         });
-
     } catch (e) {
         console.error(`Error creating room: ${e}`);
         response_500(res, 'Error creating room:', e);
@@ -102,11 +102,13 @@ async function updateRoom(req, res) {
             where: {
                 id: req.user.id,
                 userRoomId: roomId,
-                isCreator: true,
+                isCreator: true
             }
         });
         if (!userOwnsRoom) {
-            console.log('Error updating room: User is not the creator of the room');
+            console.log(
+                'Error updating room: User is not the creator of the room'
+            );
             response_403(res, 'User is not the creator of the room');
             return;
         }
@@ -142,7 +144,6 @@ async function removeUserFromRoom(req, res) {
             }
         });
 
-
         if (!room) {
             console.log('Error removing user from room: Room does not exist');
             res.status(400).json({
@@ -152,17 +153,24 @@ async function removeUserFromRoom(req, res) {
         }
 
         const possibleCreator = await prisma.user.findUnique({
-            where:{
+            where: {
                 id: req.user.id
             }
         });
 
+        if (!possibleCreator)
+            return response_403(
+                res,
+                "This User who claims to be the admin doesn't exist"
+            );
 
-        if(!possibleCreator)
-        return response_403(res, "This User who claims to be the admin doesn't exist");
-
-        if(!(possibleCreator.isCreator && room.users.find((user) => user.id == req.user.id))) 
-        return response_403(res, "User is not the creator of the room");
+        if (
+            !(
+                possibleCreator.isCreator &&
+                room.users.find((user) => user.id == req.user.id)
+            )
+        )
+            return response_403(res, 'User is not the creator of the room');
 
         const userInRoom = room.users.find((user) => user.id == userId);
         if (!userInRoom) {
@@ -188,25 +196,28 @@ async function removeUserFromRoom(req, res) {
         });
 
         const sockets = await io.in(roomCode).fetchSockets();
-        
-        const user = await prisma.user.findUnique({ // to be removed
+
+        const user = await prisma.user.findUnique({
+            // to be removed
             where: {
                 id: userId
             }
         });
 
-        for(const socket of sockets)
-        {
-            if(socket.handshake.query.id ==  userId)
-            {
+        for (const socket of sockets) {
+            if (socket.handshake.query.id == userId) {
                 socket.to(roomCode).emit('user removed', user.name);
                 socket.leave(roomCode);
                 socket.disconnect(true);
             }
         }
 
-        console.log("User removed from room successfully");
-        return response_200(res, 'User removed from room successfully', updatedRoom);
+        console.log('User removed from room successfully');
+        return response_200(
+            res,
+            'User removed from room successfully',
+            updatedRoom
+        );
     } catch (e) {
         console.error(`Error removing user from room: ${e}`);
         response_500(res, `Error removing user from room`, e);
@@ -252,7 +263,7 @@ async function addUserToRoom(req, res) {
             return;
         }
 
-        if(!room.isInviteOnly) {
+        if (!room.isInviteOnly) {
             const updatedRoom = await prisma.room.update({
                 where: {
                     code: roomCode
@@ -264,26 +275,26 @@ async function addUserToRoom(req, res) {
                         }
                     }
                 }
+            });
+
+            // this is the syntax for joining a room in socket.io
+            const sockets = await io.fetchSockets();
+
+            for (const socket of sockets) {
+                console.log(socket.handshake.query.id);
+                if (socket.handshake.query.id == req.user.id) {
+                    socket.join(roomCode);
+                    socket.emit('room joined', roomCode);
+                    socket.to(roomCode).emit('new join', user.name);
+                    break;
+                }
             }
-        );
 
-        // this is the syntax for joining a room in socket.io
-        const sockets = await io.fetchSockets();
-
-        for(const socket of sockets)
-        {
-            console.log(socket.handshake.query.id);
-            if(socket.handshake.query.id ==  req.user.id)
-            {
-                socket.join(roomCode);
-                socket.emit("room joined", roomCode);
-                socket.to(roomCode).emit('new join', user.name);
-                break;
-            }
-        }
-
-       return  response_200(res, 'User added to room successfully', updatedRoom);
-            
+            return response_200(
+                res,
+                'User added to room successfully',
+                updatedRoom
+            );
         } else {
             const updatedRoom = await prisma.room.update({
                 where: {
@@ -344,7 +355,8 @@ async function disconnectUserFromRoom(req, res) {
             return;
         } else if (userInRoom.isCreator) {
             const otherUsers = room.users.filter((user) => user.id != userId);
-            const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+            const randomUser =
+                otherUsers[Math.floor(Math.random() * otherUsers.length)];
             await prisma.user.update({
                 where: {
                     id: randomUser.id
@@ -357,7 +369,7 @@ async function disconnectUserFromRoom(req, res) {
 
         const updatedRoom = await prisma.room.update({
             where: {
-                code : roomCode
+                code: roomCode
             },
             data: {
                 users: {
@@ -370,18 +382,19 @@ async function disconnectUserFromRoom(req, res) {
 
         const sockets = await io.in(roomCode).fetchSockets();
 
-        for(const socket of sockets)
-        {
-            if(socket.handshake.query.id ==  req.user.id)
-            {
+        for (const socket of sockets) {
+            if (socket.handshake.query.id == req.user.id) {
                 socket.to(roomCode).emit('user left', user.name);
                 socket.leave(roomCode);
                 socket.disconnect(true);
             }
         }
 
-
-        return response_200(res, 'User removed from room successfully', updatedRoom);
+        return response_200(
+            res,
+            'User removed from room successfully',
+            updatedRoom
+        );
     } catch (e) {
         console.error(`Error removing user from room: ${e}`);
         return response_500(res, `Error removing user from room`, e);
@@ -432,7 +445,9 @@ async function transferOwnership(req, res) {
             }
         });
         if (!ownerUser) {
-            console.log('Error removing user from room: User is not the creator of the room');
+            console.log(
+                'Error removing user from room: User is not the creator of the room'
+            );
             response_403(res, 'User is not the creator of the room');
             return;
         }
@@ -466,7 +481,6 @@ async function transferOwnership(req, res) {
             }
         });
 
-
         await prisma.user.update({
             where: {
                 id: owneruserId
@@ -498,7 +512,9 @@ async function acceptOrRejectPendingUser(req, res) {
             }
         });
         if (!room) {
-            console.log('Error accepting/rejecting pending user: Room does not exist');
+            console.log(
+                'Error accepting/rejecting pending user: Room does not exist'
+            );
             response_400(res, 'Room does not exist');
             return;
         }
@@ -509,7 +525,9 @@ async function acceptOrRejectPendingUser(req, res) {
             }
         });
         if (!user) {
-            console.log('Error accepting/rejecting pending user: User does not exist');
+            console.log(
+                'Error accepting/rejecting pending user: User does not exist'
+            );
             response_400(res, 'User does not exist');
             return;
         }
@@ -522,7 +540,9 @@ async function acceptOrRejectPendingUser(req, res) {
             }
         });
         if (!ownerUser) {
-            console.log('Error accepting/rejecting pending user: User is not the creator of the room');
+            console.log(
+                'Error accepting/rejecting pending user: User is not the creator of the room'
+            );
             response_403(res, 'User is not the creator of the room');
             return;
         }
@@ -579,7 +599,9 @@ async function acceptOrRejectPendingUser(req, res) {
             });
             response_200(res, 'User rejected successfully');
         } else {
-            console.log('Error accepting/rejecting pending user: Invalid action');
+            console.log(
+                'Error accepting/rejecting pending user: Invalid action'
+            );
             response_400(res, 'Invalid action');
         }
     } catch (e) {

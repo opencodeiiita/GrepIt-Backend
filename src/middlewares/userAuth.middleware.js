@@ -30,6 +30,7 @@ function authVerify(req, res, next) {
         const decoded = verifyToken(token);
         const payload = extractPayloadFromToken(decoded);
         req.user = { ...payload };
+        console.log(req.user);
         next();
     } catch (error) {
         return res

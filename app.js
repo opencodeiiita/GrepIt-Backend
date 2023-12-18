@@ -4,40 +4,35 @@ import morgan from 'morgan';
 import dotenv from 'dotenv';
 import { connDB } from './src/config/db.config.js';
 import router from './src/routes/index.routes.js';
-import {createServer} from 'http';
-import {Server} from 'socket.io';
-import prisma from './src/config/db.config.js';
+import { createServer } from 'http';
+import { Server } from 'socket.io';
 
 const httpServer = createServer();
-const io = new Server(httpServer, {cors: {
-    origin: "*"
-  }});
-
-io.on("connection", async (socket)=> {
-
-    console.log('socket connected');
-
-    socket.on("disconnect", (reason)=>{
-        console.log('socket disconnected due to ', reason);
-    });
-
+const io = new Server(httpServer, {
+    cors: {
+        origin: '*'
+    }
 });
 
-io.of("/").adapter.on("create-room", (room) => {
+io.on('connection', async (socket) => {
+    console.log('socket connected');
+
+    socket.on('disconnect', (reason) => {
+        console.log('socket disconnected due to ', reason);
+    });
+});
+
+io.of('/').adapter.on('create-room', (room) => {
     console.log(`room ${room} was created`);
-  });
-  
-  io.of("/").adapter.on("join-room", (room, id) => {
+});
+
+io.of('/').adapter.on('join-room', (room, id) => {
     console.log(`socket ${id} has joined room ${room}`);
+});
 
-
-  });
-
-  io.of('/').adapter.on("leave-room", (room, id) =>{
+io.of('/').adapter.on('leave-room', (room, id) => {
     console.log(`socket ${id} has left the room ${room}`);
-  })
-
-
+});
 
 dotenv.config();
 const app = express();
@@ -59,10 +54,10 @@ app.listen(PORT, () => {
     connDB();
 });
 
-
-httpServer.listen(process.env.SOCKET_PORT, ()=>{
-    console.log(`Socket server is listening on port ${process.env.SOCKET_PORT}`);
+httpServer.listen(process.env.SOCKET_PORT, () => {
+    console.log(
+        `Socket server is listening on port ${process.env.SOCKET_PORT}`
+    );
 });
 
-
-export {io};
+export { io };
