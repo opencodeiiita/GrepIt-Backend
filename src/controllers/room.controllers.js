@@ -401,6 +401,16 @@ async function transferOwnership(req, res) {
                 }
             }
         });
+
+
+        await prisma.user.update({
+            where: {
+                id: owneruserId
+            },
+            data: {
+                isCreator: false
+            }
+        });
         response_200(res, 'Ownership transferred successfully', updatedRoom);
     } catch (e) {
         console.error(`Error transferring ownership: ${e}`);
