@@ -213,11 +213,6 @@ async function addUserToRoom(req, res) {
             });
             return;
         }
-        if (!user.isCreator && !(user.userRoomId === room.roomId)) {
-            console.log('Error removing user from room: User is not the creator of the room');
-            response_403(res, 'User is not the creator of the room');
-            return;
-        }
 
         const userInRoom = room.users.find((user) => user.id == userId);
         if (userInRoom) {
@@ -277,11 +272,6 @@ async function disconnectUserFromRoom(req, res) {
         if (!user) {
             console.log('Error removing user from room: User does not exist');
             response_404(res, 'User does not exist');
-            return;
-        }
-        if (!user.isCreator && !(user.userRoomId === room.roomId)) {
-            console.log('Error removing user from room: User is not the creator of the room');
-            response_403(res, 'User is not the creator of the room');
             return;
         }
 
