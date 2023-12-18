@@ -161,26 +161,8 @@ async function removeUserFromRoom(req, res) {
         if(!possibleCreator)
         return response_403(res, "This User who claims to be the admin doesn't exist");
 
-        if(!possibleCreator.isCreator || !room.users.find((user) => user.id == req.user.id)) 
+        if(!(possibleCreator.isCreator && room.users.find((user) => user.id == req.user.id))) 
         return response_403(res, "User is not the creator of the room");
-
-        const user = await prisma.user.findUnique({
-            where: {
-                id: userId
-            }
-        });
-
-        if (!user) {
-            console.log('Error removing user from room: User does not exist');
-            return res.status(400).json({
-                error: 'User does not exist'
-            });
-        }
-        if (!user.isCreator && !(user.userRoomId === room.roomId)) {
-            console.log('Error removing user from room: User is not the creator of the room');
-            response_403(res, 'User is not the creator of the room');
-            return;
-        }
 
         const userInRoom = room.users.find((user) => user.id == Number(userId));
         if (!userInRoom) {
@@ -238,9 +220,7 @@ async function addUserToRoom(req, res) {
 
         if (!room) {
             console.log('Error adding user to room: Room does not exist');
-            res.status(400).json({
-                error: 'Room does not exist'
-            });
+            response_404(res, 'Room does not exist');
             return;
         }
 
@@ -251,9 +231,7 @@ async function addUserToRoom(req, res) {
         });
         if (!user) {
             console.log('Error adding user to room: User does not exist');
-            res.status(400).json({
-                error: 'User does not exist'
-            });
+            response_404(res, 'User does not exist');
             return;
         }
 
@@ -262,24 +240,24 @@ async function addUserToRoom(req, res) {
             console.log(
                 'Error adding user to room: User is already in the room'
             );
-            res.status(400).json({
-                error: 'User is already in the room'
-            });
+            response_400(res, 'User is already in the room');
             return;
         }
 
-        const updatedRoom = await prisma.room.update({
-            where: {
-                code: roomCode
-            },
-            data: {
-                users: {
-                    connect: {
-                        id: userId
+        if(!room.isInviteOnly) {
+            const updatedRoom = await prisma.room.update({
+                where: {
+                    code: roomCode
+                },
+                data: {
+                    users: {
+                        connect: {
+                            id: userId
+                        }
                     }
                 }
             }
-        });
+        );
 
         // this is the syntax for joining a room in socket.io
         const sockets = await io.fetchSockets();
@@ -296,7 +274,23 @@ async function addUserToRoom(req, res) {
             }
         }
 
-        response_200(res, 'User added to room successfully', updatedRoom);
+       return  response_200(res, 'User added to room successfully', updatedRoom);
+            
+        } else {
+            const updatedRoom = await prisma.room.update({
+                where: {
+                    code: roomCode
+                },
+                data: {
+                    pending: {
+                        connect: {
+                            id: userId
+                        }
+                    }
+                }
+            });
+            response_200(res, 'User added to room waiting list', updatedRoom);
+        }
     } catch (e) {
         console.error(`Error adding user to room: ${e}`);
         response_500(res, `Error adding user to room`, e);
@@ -480,12 +474,119 @@ async function transferOwnership(req, res) {
     }
 }
 
+async function acceptOrRejectPendingUser(req, res) {
+    try {
+        const roomId = parseInt(req.query.roomId);
+        const userId = parseInt(req.query.userId);
+        const owneruserId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                roomId: roomId
+            },
+            include: {
+                users: true,
+                pending: true
+            }
+        });
+        if (!room) {
+            console.log('Error accepting/rejecting pending user: Room does not exist');
+            response_400(res, 'Room does not exist');
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            console.log('Error accepting/rejecting pending user: User does not exist');
+            response_400(res, 'User does not exist');
+            return;
+        }
+
+        const ownerUser = await prisma.user.findUnique({
+            where: {
+                id: owneruserId,
+                isCreator: true,
+                userRoomId: roomId
+            }
+        });
+        if (!ownerUser) {
+            console.log('Error accepting/rejecting pending user: User is not the creator of the room');
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == userId);
+        if (userInRoom) {
+            console.log(
+                'Error accepting/rejecting pending user: User is already in the room'
+            );
+            response_400(res, 'User is already in the room');
+            return;
+        }
+
+        const pendingUser = room.pending.find((user) => user.id == userId);
+        if (!pendingUser) {
+            console.log(
+                'Error accepting/rejecting pending user: User is not in the pending list'
+            );
+            response_400(res, 'User is not in the pending list');
+            return;
+        }
+
+        if (req.query.action === 'accept') {
+            await prisma.room.update({
+                where: {
+                    roomId: roomId
+                },
+                data: {
+                    users: {
+                        connect: {
+                            id: userId
+                        }
+                    },
+                    pending: {
+                        disconnect: {
+                            id: userId
+                        }
+                    }
+                }
+            });
+            response_200(res, 'User accepted successfully');
+        } else if (req.query.action === 'reject') {
+            await prisma.room.update({
+                where: {
+                    roomId: roomId
+                },
+                data: {
+                    pending: {
+                        disconnect: {
+                            id: userId
+                        }
+                    }
+                }
+            });
+            response_200(res, 'User rejected successfully');
+        } else {
+            console.log('Error accepting/rejecting pending user: Invalid action');
+            response_400(res, 'Invalid action');
+        }
+    } catch (e) {
+        console.error(`Error accepting/rejecting pending user: ${e}`);
+        response_500(res, `Error accepting/rejecting pending user`, e);
+    }
+}
+
 export {
     removeUserFromRoom,
     addUserToRoom,
     createRoom,
     updateRoom,
     disconnectUserFromRoom,
-    transferOwnership
+    transferOwnership,
+    acceptOrRejectPendingUser
 };
 
