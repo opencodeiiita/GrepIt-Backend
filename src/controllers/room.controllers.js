@@ -225,7 +225,7 @@ async function addUserToRoom(req, res) {
             return;
         }
 
-        if(!room.inviteOnly) {
+        if(!room.isInviteOnly) {
             const updatedRoom = await prisma.room.update({
                 where: {
                     code: roomCode
@@ -245,7 +245,7 @@ async function addUserToRoom(req, res) {
                     code: roomCode
                 },
                 data: {
-                    pendingUsers: {
+                    pending: {
                         connect: {
                             id: userId
                         }
