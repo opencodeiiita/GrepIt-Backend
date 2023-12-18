@@ -357,7 +357,7 @@ async function transferOwnership(req, res) {
                 roomId: roomId
             }
         });
-        if (!ownerUser.isCreator && !(ownerUser.userRoomId === room.roomId)) {
+        if (!ownerUser) {
             console.log('Error removing user from room: User is not the creator of the room');
             response_403(res, 'User is not the creator of the room');
             return;
