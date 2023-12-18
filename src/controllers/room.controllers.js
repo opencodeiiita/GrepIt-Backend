@@ -28,8 +28,8 @@ async function createRoom(req, res) {
 
         const room = await prisma.room.create({
             data: {
-                "roomName" : req.body.roomName,
-                "roomDescription" : req.body.roomDescription,
+                roomName : req.body.roomName,
+                roomDescription : req.body.roomDescription,
                 code,
                 users: {
                     connect: [{ id: req.user.id }]
@@ -164,7 +164,7 @@ async function removeUserFromRoom(req, res) {
         if(!(possibleCreator.isCreator && room.users.find((user) => user.id == req.user.id))) 
         return response_403(res, "User is not the creator of the room");
 
-        const userInRoom = room.users.find((user) => user.id == Number(userId));
+        const userInRoom = room.users.find((user) => user.id == userId);
         if (!userInRoom) {
             console.log(
                 'Error removing user from room: User is not in the room'
@@ -189,15 +189,23 @@ async function removeUserFromRoom(req, res) {
 
         const sockets = await io.in(roomCode).fetchSockets();
         
+        const user = await prisma.user.findUnique({ // to be removed
+            where: {
+                id: userId
+            }
+        });
+
         for(const socket of sockets)
         {
             if(socket.handshake.query.id ==  userId)
             {
-                socket.to(roomCode).emit('user kicked', user.name);
+                socket.to(roomCode).emit('user removed', user.name);
                 socket.leave(roomCode);
                 socket.disconnect(true);
             }
         }
+
+        console.log("User removed from room successfully");
         return response_200(res, 'User removed from room successfully', updatedRoom);
     } catch (e) {
         console.error(`Error removing user from room: ${e}`);

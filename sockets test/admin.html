@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Socket and API Interaction</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script> 
+        var roomCode ;
+        let roomData = {};
+        var socket; // Variable to hold the socket instance
+        let socketId = '';
+    </script>
+
+    <script>
+
+        console.log("hello world");
+        function createRoom() {
+            // Creates a WebSocket instance connecting to localhost:4001
+            socket = io('http://localhost:4001/',{
+                query:{
+                    id: Number(document.getElementById('userId').value)
+                }
+            });
+
+            const description = "Hello world";
+            const roomName = "test room";
+            // Listens for a 'connect' event
+            socket.on('connect', function() {
+                console.log('Connected!');
+
+            fetch(`http://localhost:4000/api/v1/room/create`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization' : document.getElementById('token').value,
+                },
+                body: JSON.stringify({ roomName : roomName, roomDescription : description})
+            })
+            
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                roomData = data;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+            });
+            
+
+            socket.on('room joined', function(roomcode){
+            window.alert(`room ${roomcode} joined`);
+            })
+            // Listens for a 'disconnect' event
+            socket.on('disconnect', function() {
+                console.log('Disconnected!');
+            });
+            socket.on('hello', function(){
+                console.log("server said hello");
+            });
+
+            socket.on("new join" , function(name){
+                window.alert(name + " joined the room");
+            });
+
+            socket.on('user left', function(name){
+                window.alert(name + " left the room");
+            });
+
+            socket.on("user removed", function(name){
+                window.alert(name + " was kicked from the room");
+            })
+
+
+
+        }
+
+
+        function joinRoom()
+        {
+            
+            console.log(roomCode, socketId);
+            // Making a request to the server
+
+            roomCode = document.getElementById('roomCode').value;
+            socket = io('http://localhost:4001/', {
+                query:{
+                    id: Number( document.getElementById('userId').value)
+                }
+            });
+
+            // Listens for a 'connect' event
+
+            socket.on('connect', function() {
+                console.log('Connected!');
+
+                socketId = socket.id;
+
+
+                fetch(`http://localhost:4000/api/v1/room/user/add?roomCode=${roomCode}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'authorization' : document.getElementById('token').value,
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    update = data;
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+
+                
+
+            });
+
+
+            socket.on('room joined', function(roomcode){
+                window.alert(`room ${roomcode} joined`);
+                })
+
+
+                // Listens for a 'disconnect' event
+                socket.on('disconnect', function() {
+                    console.log('Disconnected!');
+                });
+
+
+                socket.on('hello', function(){
+                    console.log("server said hello");
+                });
+
+    
+                socket.on("new join" , function(name){
+                    window.alert(name + " joined the room");
+                })
+
+                socket.on('user left', function(name){
+                    window.alert(name + " left the room");
+                });
+
+                socket.on("user removed", function(name){
+                    window.alert(name + " was kicked from the room");
+                })
+        }
+
+    </script>
+
+    <script>
+        function leaveRoom()
+        {
+
+            roomCode = document.getElementById('roomCode').value;
+            fetch(`http://localhost:4000/api/v1/room/user/disconnect?roomCode=${roomCode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization' :  document.getElementById('token').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        function kick()
+        {
+            roomCode = document.getElementById('roomCode').value;
+            fetch(`http://localhost:4000/api/v1/room/user/remove?roomCode=${roomCode}&userId=${document.getElementById('kick').value}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization' :  document.getElementById('token').value,
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+            })
+            .catch((error) =>{
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</head>
+<body>
+    <input id="roomCode" type="text" placeholder="roomCode"><br>
+    <input id = "token" type = "text" placeholder = "auth Token" ><br>
+    <input id="userId" type="text" placeholder="userId"><br>
+    <input id = "kick" type = "text" placeholder="kick"><br>
+    <button onclick="createRoom()">Create Room</button>
+    <button onclick="joinRoom()">Join Room</button>
+    <button onclick="leaveRoom()">Leave Room</button>
+    <button onclick="kick()">Kick from Room</button>
+</body>
+</html>

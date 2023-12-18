@@ -17,13 +17,6 @@ io.on("connection", async (socket)=> {
 
     console.log('socket connected');
 
-
-    socket.on("leaveRoom" , (roomId, userName)=>{
-        socket.leave(roomId);
-        socket.disconnect(true);
-        socket.to(roomId).broadcast.emit(`User ${userName} has left the room`);
-    });
-
     socket.on("disconnect", (reason)=>{
         console.log('socket disconnected due to ', reason);
     });
@@ -66,27 +59,6 @@ app.listen(PORT, () => {
     connDB();
 });
 
-app.get('/room/',async  (req, res) => {
-    console.log('get rooms');
-    const rooms = await prisma.room.findMany();
-    res.json(rooms);
-});
-
-app.get('/user/',async  (req, res) => {
-    console.log('get users');
-    const users = await prisma.user.findMany();
-    res.json(users);
-});
-
-app.delete('/room/delete/:code', async (req, res) => {
-    const { code } = req.params;
-    const room = await prisma.room.delete({
-        where: {
-            code: code
-        }
-    });
-    return res.status(200).send("Room deleted");
-});
 
 httpServer.listen(process.env.SOCKET_PORT, ()=>{
     console.log(`Socket server is listening on port ${process.env.SOCKET_PORT}`);
