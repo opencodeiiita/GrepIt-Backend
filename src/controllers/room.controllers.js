@@ -79,7 +79,14 @@ async function updateRoom(req, res) {
             return;
         }
 
-        if (room.creatorId !== req.user.id) { 
+        const userOwnsRoom = await prisma.user.findUnique({
+            where: {
+                id: req.user.id,
+                userRoomId: roomId,
+                isCreator: true,
+            }
+        });
+        if (!userOwnsRoom) {
             console.log('Error updating room: User is not the creator of the room');
             response_403(res, 'User is not the creator of the room');
             return;
@@ -87,7 +94,7 @@ async function updateRoom(req, res) {
 
         const updatedRoom = await prisma.room.update({
             where: {
-                roomId: Number(roomId)
+                roomId: roomId
             },
             data: {
                 roomName: roomName,
@@ -124,12 +131,6 @@ async function removeUserFromRoom(req, res) {
             return;
         }
 
-        if (room.creatorId !== req.user.id) {
-            console.log("Error removing user from room: User is not the creator of the room");
-            response_403(res, "User is not the creator of the room");
-            return;
-        }
-
         const user = await prisma.user.findUnique({
             where: {
                 id: Number(userId)
@@ -140,6 +141,11 @@ async function removeUserFromRoom(req, res) {
             res.status(400).json({
                 error: 'User does not exist'
             });
+            return;
+        }
+        if (!user.isCreator && !(user.userRoomId === room.roomId)) {
+            console.log('Error removing user from room: User is not the creator of the room');
+            response_403(res, 'User is not the creator of the room');
             return;
         }
 
@@ -192,12 +198,6 @@ async function addUserToRoom(req, res) {
             res.status(400).json({
                 error: 'Room does not exist'
             });
-            return;
-        }
-
-        if (room.creatorId !== req.user.id) {
-            console.log("Error adding user to room: User is not the creator of the room");
-            response_403(res, "User is not the creator of the room");
             return;
         }
 
@@ -282,6 +282,17 @@ async function disconnectUserFromRoom(req, res) {
             );
             response_400(res, 'User is not in the room');
             return;
+        } else if (userInRoom.isCreator) {
+            const otherUsers = room.users.filter((user) => user.id != userId);
+            const randomUser = otherUsers[Math.floor(Math.random() * otherUsers.length)];
+            await prisma.user.update({
+                where: {
+                    id: randomUser.id
+                },
+                data: {
+                    isCreator: true
+                }
+            });
         }
 
         const updatedRoom = await prisma.room.update({
@@ -303,11 +314,106 @@ async function disconnectUserFromRoom(req, res) {
     }
 }
 
+async function transferOwnership(req, res) {
+    try {
+        const roomId = parseInt(req.query.roomId);
+        const userId = parseInt(req.query.userId);
+        const owneruserId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                roomId: roomId
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            console.log('Error transferring ownership: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+        if (!user) {
+            console.log('Error transferring ownership: User does not exist');
+            res.status(400).json({
+                error: 'User does not exist'
+            });
+            return;
+        }
+
+        const ownerUser = await prisma.user.findUnique({
+            where: {
+                id: owneruserId,
+                isCreator: true,
+                roomId: roomId
+            }
+        });
+        if (!ownerUser) {
+            console.log('Error removing user from room: User is not the creator of the room');
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == userId);
+        if (!userInRoom) {
+            console.log(
+                'Error transferring ownership: User is not in the room'
+            );
+            res.status(400).json({
+                error: 'User is not in the room'
+            });
+            return;
+        }
+
+        const updatedRoom = await prisma.room.update({
+            where: {
+                roomId: roomId
+            },
+            data: {
+                users: {
+                    update: {
+                        where: {
+                            id: userId
+                        },
+                        data: {
+                            isCreator: true
+                        }
+                    }
+                }
+            }
+        });
+
+
+        await prisma.user.update({
+            where: {
+                id: owneruserId
+            },
+            data: {
+                isCreator: false
+            }
+        });
+        response_200(res, 'Ownership transferred successfully', updatedRoom);
+    } catch (e) {
+        console.error(`Error transferring ownership: ${e}`);
+        response_500(res, `Error transferring ownership`, e);
+    }
+}
+
 export {
     removeUserFromRoom,
     addUserToRoom,
     createRoom,
     updateRoom,
-    disconnectUserFromRoom
+    disconnectUserFromRoom,
+    transferOwnership
 };
 
