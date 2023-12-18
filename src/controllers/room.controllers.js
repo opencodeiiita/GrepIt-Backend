@@ -195,9 +195,7 @@ async function addUserToRoom(req, res) {
 
         if (!room) {
             console.log('Error adding user to room: Room does not exist');
-            res.status(400).json({
-                error: 'Room does not exist'
-            });
+            response_404(res, 'Room does not exist');
             return;
         }
 
@@ -208,9 +206,7 @@ async function addUserToRoom(req, res) {
         });
         if (!user) {
             console.log('Error adding user to room: User does not exist');
-            res.status(400).json({
-                error: 'User does not exist'
-            });
+            response_404(res, 'User does not exist');
             return;
         }
 
@@ -219,9 +215,7 @@ async function addUserToRoom(req, res) {
             console.log(
                 'Error adding user to room: User is already in the room'
             );
-            res.status(400).json({
-                error: 'User is already in the room'
-            });
+            response_400(res, 'User is already in the room');
             return;
         }
 
