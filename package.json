@@ -21,7 +21,8 @@
         "express": "^4.18.2",
         "jsonwebtoken": "^9.0.2",
         "mysql2": "^3.6.5",
-        "randomstring": "^1.3.0"
+        "randomstring": "^1.3.0",
+        "socket.io": "^4.7.2"
     },
     "devDependencies": {
         "@babel/core": "^7.23.5",

@@ -24,7 +24,7 @@ async function registerUser(req, res) {
 
         if (userAlreadyPresent) {
             console.log('Error creating user: User already exists in the DB');
-            response_200(res,'User already exists in the DB');
+            return response_200(res,'User already exists in the DB');
         }
 
         const salt = await bcrypt.genSalt(saltRounds);
@@ -40,7 +40,7 @@ async function registerUser(req, res) {
 
         const token = jwt.sign({userID:user.id,userName:user.name,isCreator:false},JWT_SECRET,{expiresIn:'2d'})
 
-        response_200(res,'User created successfully',{
+        return response_200(res,'User created successfully',{
             user: user,
             token:token
         });
