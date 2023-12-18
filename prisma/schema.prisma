@@ -1,56 +1,59 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider     = "mysql"
-    url          = env("DATABASE_URL")
-    relationMode = "prisma"
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
 }
 
 //do not touch this model, this was for creating a non-empty db.
 model Init {
-    id Int @id @default(autoincrement())
+  id Int @id @default(autoincrement())
 }
 
 model User {
-    id         Int     @id @default(autoincrement())
-    name       String 
-    email      String  @unique
-    password   String 
-    currPoints Int     @default(0)
-    userRoom   Room?   @relation(fields: [userRoomId], references: [roomId])
-    userRoomId Int? 
-    isCreator  Boolean @default(false)
+  id           Int     @id @default(autoincrement())
+  name         String
+  email        String  @unique
+  password     String
+  currPoints   Int     @default(0)
+  userRoom     Room?   @relation("RoomToUsers", fields: [userRoomId], references: [roomId])
+  userRoomId   Int?
+  pendingRooms Room[]  @relation("RoomToPendingUsers")
+  isCreator    Boolean @default(false)
 
-    @@index([userRoomId], name: "userRoomId")
+  @@index([userRoomId], name: "userRoomId")
 }
 
 model Question {
-    questionId Int      @id @default(autoincrement())
-    question   String
-    options    Option[] @relation("QuestionToOptions")
-    room       Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId], onDelete: Cascade)
-    roomId     Int
+  questionId Int      @id @default(autoincrement())
+  question   String
+  options    Option[] @relation("QuestionToOptions")
+  room       Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId], onDelete: Cascade)
+  roomId     Int
 
-    @@index([roomId], name: "roomId")
+  @@index([roomId], name: "roomId")
 }
 
 model Option {
-    optionId   Int      @id @default(autoincrement())
-    option     String
-    question   Question @relation("QuestionToOptions", fields: [questionId], references: [questionId], onDelete: Cascade)
-    questionId Int
-    isCorrect  Boolean  @default(false)
+  optionId   Int      @id @default(autoincrement())
+  option     String
+  question   Question @relation("QuestionToOptions", fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionId Int
+  isCorrect  Boolean  @default(false)
 
-    @@index([questionId], name: "questionId")
+  @@index([questionId], name: "questionId")
 }
 
 model Room {
-    roomId    Int        @id @default(autoincrement())
-    roomName  String
-    roomDescription String?
-    code      String     @unique
-    questions Question[] @relation("RoomToQuestions")
-    users     User[]
+  roomId          Int        @id @default(autoincrement())
+  roomName        String
+  roomDescription String?
+  code            String     @unique
+  isInviteOnly    Boolean    @default(false)
+  questions       Question[] @relation("RoomToQuestions")
+  pending         User[]     @relation("RoomToPendingUsers")
+  users           User[]     @relation("RoomToUsers")
 }

@@ -4,7 +4,8 @@ import {
     removeUserFromRoom,
     updateRoom,
     addUserToRoom,
-    disconnectUserFromRoom
+    disconnectUserFromRoom,
+    acceptOrRejectPendingUser
 } from '../../controllers/room.controllers.js';
 
 const roomRouter = express.Router();
@@ -14,5 +15,6 @@ roomRouter.route('/user/remove').post(removeUserFromRoom);
 roomRouter.route('/update').patch(updateRoom);
 roomRouter.route('/user/add').post(addUserToRoom);
 roomRouter.route('/user/disconnect').post(disconnectUserFromRoom);
+roomRouter.route('/user/pending').post(acceptOrRejectPendingUser);
 
 export default roomRouter;
