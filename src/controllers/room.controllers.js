@@ -430,7 +430,7 @@ async function acceptOrRejectPendingUser(req, res) {
             },
             include: {
                 users: true,
-                pendingUsers: true
+                pending: true
             }
         });
         if (!room) {
@@ -454,7 +454,7 @@ async function acceptOrRejectPendingUser(req, res) {
             where: {
                 id: owneruserId,
                 isCreator: true,
-                roomId: roomId
+                userRoomId: roomId
             }
         });
         if (!ownerUser) {
@@ -472,7 +472,7 @@ async function acceptOrRejectPendingUser(req, res) {
             return;
         }
 
-        const pendingUser = room.pendingUsers.find((user) => user.id == userId);
+        const pendingUser = room.pending.find((user) => user.id == userId);
         if (!pendingUser) {
             console.log(
                 'Error accepting/rejecting pending user: User is not in the pending list'
@@ -492,7 +492,7 @@ async function acceptOrRejectPendingUser(req, res) {
                             id: userId
                         }
                     },
-                    pendingUsers: {
+                    pending: {
                         disconnect: {
                             id: userId
                         }
@@ -506,7 +506,7 @@ async function acceptOrRejectPendingUser(req, res) {
                     roomId: roomId
                 },
                 data: {
-                    pendingUsers: {
+                    pending: {
                         disconnect: {
                             id: userId
                         }

@@ -66,8 +66,12 @@
   - `POST /api/v1/room/user/pending?roomId=<roomID>&userId=<userId>&action=<accept/reject>` Accept/Reject Pending Users
 
     **Header**
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjJ9fQ.qCeDtlDIvzmYCpMzWEGNsJ9yEio8R7_UiR3Tjl-uxC0`
+    Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
 
     **Response**
     ```json
+    {
+      "status": "OK",
+      "message": "User accepted successfully"
+    }
     ```
