@@ -132,11 +132,11 @@ async function updateRoom(req, res) {
 
 async function deleteRoom(req,res) {
     try {
-        const roomId = parseInt(req.query.roomId);
+        const roomCode = req.params.roomCode;
 
         const room = await prisma.room.findUnique({
             where: {
-                roomId: roomId
+                code: roomCode
             }
         });
 
@@ -150,7 +150,7 @@ async function deleteRoom(req,res) {
         const userOwnsRoom = await prisma.user.findUnique({
             where: {
                 id: req.user.id,
-                userRoomId: roomId,
+                userRoomId: room.roomId,
                 isCreator: true
             }
         });
@@ -164,7 +164,7 @@ async function deleteRoom(req,res) {
 
         const deletedRoom = await prisma.room.delete({
             where: {
-                id:roomId
+                code:roomCode
             }
         })
 
@@ -172,10 +172,15 @@ async function deleteRoom(req,res) {
 
         // Iterate through sockets and disconnect those associated with the deleted room
         for (const socket of sockets) {
-            if (socket.rooms.has(deletedRoom.code)) {
+            if (socket.rooms.has(roomCode)) {
                 // If the socket is part of the room being deleted
-                socket.to(deletedRoom.code).emit('This room has been deleted', deletedRoom.roomName);
-                socket.leave(deletedRoom.code);
+                for(const socketOfRoomCreator of socket)
+                {
+                // Sends message to room creator
+                if(socketOfRoomCreator.handshake.query.id === userOwnsRoom.id)
+                socket.to(roomCode).emit('This room has been deleted', deletedRoom.roomName);
+                }
+                socket.leave(roomCode);
                 socket.disconnect(true); // Disconnect the socket
             }
         }
@@ -674,6 +679,7 @@ export {
     addUserToRoom,
     createRoom,
     updateRoom,
+    deleteRoom,
     disconnectUserFromRoom,
     transferOwnership,
     acceptOrRejectPendingUser
