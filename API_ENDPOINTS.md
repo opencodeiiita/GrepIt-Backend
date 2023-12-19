@@ -63,6 +63,20 @@
       "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjUsInVzZXJOYW1lIjoid2FkYWQiLCJpc0NyZWF0b3IiOnRydWUsImlhdCI6MTcwMjY3ODgzNSwiZXhwIjoxNzAyODUxNjM1fQ.JeMgwc7aMYSg1UyTCqGLkKf2Re8HxIqJ0y5On5VtWSM"
     }
     ```
+  
+  - `DELETE /api/v1/room/:roomCode` Delete a room
+
+    **Header:**
+    authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0
+
+    **Response:**
+    ```json
+    {
+    "status": "OK",
+    "message": "Room deleted successfully"
+    }
+    ```
+
   - `POST /api/v1/room/user/pending?roomId=<roomID>&userId=<userId>&action=<accept/reject>` Accept/Reject Pending Users
 
     **Header**
