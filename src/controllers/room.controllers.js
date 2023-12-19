@@ -620,3 +620,47 @@ export {
     acceptOrRejectPendingUser
 };
 
+export const announce = async (req, res) => {
+    try{
+        const { code, message } = req.body;
+        const userId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: code
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            return response_404(res, "Room not found");
+        }
+
+        const user = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!user) {
+            return response_404(res, "User not found");
+        }
+
+        const userInRoom = room.users.find((user) => user.id === userId);
+        if (!userInRoom) {
+            return response_400(res, "User is not in the room");
+        }
+        if(!userInRoom.isCreator){
+            return response_403(res, "User is not the creator of the room");
+        }
+
+        io.to(room.code).emit('announcement', message);
+
+        return response_200(res ,"Announcement sent");
+    }
+    catch (err) {
+        return response_500(res, 'Error sending announcement', err);
+    }
+}

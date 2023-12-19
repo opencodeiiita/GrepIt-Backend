@@ -76,6 +76,10 @@
     }
     ```
     - `POST /api/v1/room/announce` Announce in a room
+
+    **Header**
+    Authorization: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+  - 
     ```json
     {
       "code": 1,
