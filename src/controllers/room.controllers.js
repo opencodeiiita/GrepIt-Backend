@@ -130,6 +130,65 @@ async function updateRoom(req, res) {
     }
 }
 
+async function deleteRoom(req,res) {
+    try {
+        const roomId = parseInt(req.query.roomId);
+
+        const room = await prisma.room.findUnique({
+            where: {
+                roomId: roomId
+            }
+        });
+
+        if (!room) {
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const userOwnsRoom = await prisma.user.findUnique({
+            where: {
+                id: req.user.id,
+                userRoomId: roomId,
+                isCreator: true
+            }
+        });
+        if (!userOwnsRoom) {
+            console.log(
+                'Error updating room: User is not the creator of the room'
+            );
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
+        const deletedRoom = await prisma.room.delete({
+            where: {
+                id:roomId
+            }
+        })
+
+        const sockets = await io.fetchSockets();
+
+        // Iterate through sockets and disconnect those associated with the deleted room
+        for (const socket of sockets) {
+            if (socket.rooms.has(deletedRoom.code)) {
+                // If the socket is part of the room being deleted
+                socket.to(deletedRoom.code).emit('This room has been deleted', deletedRoom.roomName);
+                socket.leave(deletedRoom.code);
+                socket.disconnect(true); // Disconnect the socket
+            }
+        }
+        
+        return response_200(res,"Room deleted successfully");
+
+    }
+    catch(error)
+    {
+        response_500(res,'Error deleting room', error);
+    }
+}
+
 async function removeUserFromRoom(req, res) {
     try {
         const roomCode = req.query.roomCode;
