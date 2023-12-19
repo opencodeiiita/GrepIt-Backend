@@ -6,7 +6,8 @@ import {
     updateRoom,
     addUserToRoom,
     disconnectUserFromRoom,
-    acceptOrRejectPendingUser
+    acceptOrRejectPendingUser,
+    announce
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 import prisma from '../../config/db.config.js';
@@ -19,6 +20,7 @@ roomRouter.patch('/update', authVerify, updateRoom);
 roomRouter.post('/user/add', authVerify, addUserToRoom);
 roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
 roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
+roomRouter.post("/announce", authVerify, announce);
 
 // just  testing routes for now can be upgraded later
 roomRouter.get('/', async (req, res) => {
