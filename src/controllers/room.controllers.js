@@ -130,6 +130,70 @@ async function updateRoom(req, res) {
     }
 }
 
+async function deleteRoom(req,res) {
+    try {
+        const roomCode = req.params.roomCode;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode
+            }
+        });
+
+        if (!room) {
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+
+        const userOwnsRoom = await prisma.user.findUnique({
+            where: {
+                id: req.user.id,
+                userRoomId: room.roomId,
+                isCreator: true
+            }
+        });
+        if (!userOwnsRoom) {
+            console.log(
+                'Error updating room: User is not the creator of the room'
+            );
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
+        const deletedRoom = await prisma.room.delete({
+            where: {
+                code:roomCode
+            }
+        })
+
+        const sockets = await io.fetchSockets();
+
+        // Iterate through sockets and disconnect those associated with the deleted room
+        for (const socket of sockets) {
+            if (socket.rooms.has(roomCode)) {
+                // If the socket is part of the room being deleted
+                for(const socketOfRoomCreator of socket)
+                {
+                // Sends message to room creator
+                if(socketOfRoomCreator.handshake.query.id === userOwnsRoom.id)
+                socket.to(roomCode).emit('This room has been deleted', deletedRoom.roomName);
+                }
+                socket.leave(roomCode);
+                socket.disconnect(true); // Disconnect the socket
+            }
+        }
+        
+        return response_200(res,"Room deleted successfully");
+
+    }
+    catch(error)
+    {
+        response_500(res,'Error deleting room', error);
+    }
+}
+
 async function removeUserFromRoom(req, res) {
     try {
         const roomCode = req.query.roomCode;
@@ -615,6 +679,7 @@ export {
     addUserToRoom,
     createRoom,
     updateRoom,
+    deleteRoom,
     disconnectUserFromRoom,
     transferOwnership,
     acceptOrRejectPendingUser
