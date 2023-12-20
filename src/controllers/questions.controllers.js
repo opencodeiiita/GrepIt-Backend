@@ -5,7 +5,7 @@ async function addMultipleChoiceQuestion(req, res) {
     try {
         const question = req.body.question;
         const options = req.body.options;
-        const roomId = req.params.roomId;
+        const roomId = req.query.roomId;
 
         const newQuestion = await prisma.question.create({
             data: {
@@ -33,3 +33,4 @@ async function addMultipleChoiceQuestion(req, res) {
 }
 
 export { addMultipleChoiceQuestion };
+
