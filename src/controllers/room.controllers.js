@@ -130,9 +130,9 @@ async function updateRoom(req, res) {
     }
 }
 
-async function deleteRoom(req,res) {
+async function deleteRoom(req, res) {
     try {
-        const roomCode = req.params.roomCode;
+        const roomCode = req.query.roomCode;
 
         const room = await prisma.room.findUnique({
             where: {
@@ -164,9 +164,9 @@ async function deleteRoom(req,res) {
 
         const deletedRoom = await prisma.room.delete({
             where: {
-                code:roomCode
+                code: roomCode
             }
-        })
+        });
 
         const sockets = await io.fetchSockets();
 
@@ -174,23 +174,27 @@ async function deleteRoom(req,res) {
         for (const socket of sockets) {
             if (socket.rooms.has(roomCode)) {
                 // If the socket is part of the room being deleted
-                for(const socketOfRoomCreator of socket)
-                {
-                // Sends message to room creator
-                if(socketOfRoomCreator.handshake.query.id === userOwnsRoom.id)
-                socket.to(roomCode).emit('This room has been deleted', deletedRoom.roomName);
+                for (const socketOfRoomCreator of socket) {
+                    // Sends message to room creator
+                    if (
+                        socketOfRoomCreator.handshake.query.id ===
+                        userOwnsRoom.id
+                    )
+                        socket
+                            .to(roomCode)
+                            .emit(
+                                'This room has been deleted',
+                                deletedRoom.roomName
+                            );
                 }
                 socket.leave(roomCode);
                 socket.disconnect(true); // Disconnect the socket
             }
         }
-        
-        return response_200(res,"Room deleted successfully");
 
-    }
-    catch(error)
-    {
-        response_500(res,'Error deleting room', error);
+        return response_200(res, 'Room deleted successfully');
+    } catch (error) {
+        response_500(res, 'Error deleting room', error);
     }
 }
 
@@ -686,7 +690,7 @@ export {
 };
 
 export const announce = async (req, res) => {
-    try{
+    try {
         const { code, message } = req.body;
         const userId = req.user.id;
 
@@ -700,7 +704,7 @@ export const announce = async (req, res) => {
         });
 
         if (!room) {
-            return response_404(res, "Room not found");
+            return response_404(res, 'Room not found');
         }
 
         const user = await prisma.user.findUnique({
@@ -710,22 +714,22 @@ export const announce = async (req, res) => {
         });
 
         if (!user) {
-            return response_404(res, "User not found");
+            return response_404(res, 'User not found');
         }
 
         const userInRoom = room.users.find((user) => user.id === userId);
         if (!userInRoom) {
-            return response_400(res, "User is not in the room");
+            return response_400(res, 'User is not in the room');
         }
-        if(!userInRoom.isCreator){
-            return response_403(res, "User is not the creator of the room");
+        if (!userInRoom.isCreator) {
+            return response_403(res, 'User is not the creator of the room');
         }
 
         io.to(room.code).emit('announcement', message);
 
-        return response_200(res ,"Announcement sent");
-    }
-    catch (err) {
+        return response_200(res, 'Announcement sent');
+    } catch (err) {
         return response_500(res, 'Error sending announcement', err);
     }
-}
+};
+

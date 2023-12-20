@@ -187,5 +187,11 @@ All the contributor's github profile image will be displayed here, pick up the b
     <a href="https://github.com/WadadParker" title="Wadad Parker">
         <img src="https://github.com/WadadParker.png" width="70px" alt="Wadad Parker">
     </a>
+    <a href="https://github.com/DikshantK2004" title="Dikshant Khandelwal">
+        <img src="https://github.com/DikshantK2004.png" width="70px" alt="Dikshant Khandelwal">
+    </a>
+    <a href="https://github.com/Jarviss77" title="Shubham Gupta">
+        <img src="https://github.com/Jarviss77.png" width="70px" alt="Shubham Gupta">
+    </a>
 </div>
 

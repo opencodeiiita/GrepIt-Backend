@@ -21,8 +21,8 @@ roomRouter.patch('/update', authVerify, updateRoom);
 roomRouter.post('/user/add', authVerify, addUserToRoom);
 roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
 roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
-roomRouter.post("/announce", authVerify, announce);
-roomRouter.delete("/delete/:roomCode",authVerify,deleteRoom)
+roomRouter.post('/announce', authVerify, announce);
+roomRouter.delete('/delete', authVerify, deleteRoom);
 
 // just  testing routes for now can be upgraded later
 roomRouter.get('/', async (req, res) => {
