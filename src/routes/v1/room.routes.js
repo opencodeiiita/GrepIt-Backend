@@ -11,7 +11,6 @@ import {
     announce
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
-import prisma from '../../config/db.config.js';
 
 const roomRouter = express.Router();
 
@@ -23,12 +22,6 @@ roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
 roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
 roomRouter.post('/announce', authVerify, announce);
 roomRouter.delete('/delete', authVerify, deleteRoom);
-
-// just  testing routes for now can be upgraded later
-roomRouter.get('/', async (req, res) => {
-    const rooms = await prisma.room.findMany();
-    return res.json(rooms);
-});
 
 export default roomRouter;
 
