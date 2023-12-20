@@ -678,6 +678,41 @@ async function acceptOrRejectPendingUser(req, res) {
     }
 }
 
+async function leaderboardRoom(req, res) {
+    try {
+        const roomCode = (req.query.roomCode);
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode
+            },
+            include: {
+                users: {
+                    orderBy: {currPoints: 'desc'},
+                    select: {
+                        name: true,
+                        currPoints: true
+                    }
+                }
+            }
+        });
+        if (!room) {
+            console.log('Error updating room: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+        const leaderboardData = room.users.map(user => ({
+            name: user.name,
+            points: user.currPoints
+        }));
+        response_200(res, 'Leaderboard Details', leaderboardData);
+    } catch (e) {
+        console.error(`Error updating room: ${e}`);
+        response_500(res, `Error updating room`, e);
+    }
+}
+
 export {
     removeUserFromRoom,
     addUserToRoom,
@@ -686,7 +721,8 @@ export {
     deleteRoom,
     disconnectUserFromRoom,
     transferOwnership,
-    acceptOrRejectPendingUser
+    acceptOrRejectPendingUser,
+    leaderboardRoom
 };
 
 export const announce = async (req, res) => {
