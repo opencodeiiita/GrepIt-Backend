@@ -321,10 +321,8 @@ async function addUserToRoom(req, res) {
         const userInRoom = room.users.find((user) => user.id == userId);
         if (userInRoom) {
             console.log(
-                'Error adding user to room: User is already in the room'
+                'User is already in the room'
             );
-            response_400(res, 'User is already in the room');
-            return;
         }
 
         if (!room.isInviteOnly) {
@@ -345,7 +343,7 @@ async function addUserToRoom(req, res) {
             const sockets = await io.fetchSockets();
 
             for (const socket of sockets) {
-                console.log(socket.handshake.query.id);
+                console.log("User wants to join: " + socket.handshake.query.id);
                 if (socket.handshake.query.id == req.user.id) {
                     socket.join(roomCode);
                     socket.emit('room joined', roomCode);
@@ -674,6 +672,128 @@ async function acceptOrRejectPendingUser(req, res) {
     }
 }
 
+async function startQuiz (req, res) {
+    try {
+        const roomCode = req.query.roomCode;
+        const owneruserId = req.user.id;
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode,
+            },
+            include: {
+                users: true,
+                questions: {
+                    include: {
+                        options: true
+                    }
+                }
+            }
+        });
+
+        if (!room) {
+            console.log('Error starting quiz: Room does not exist');
+            response_404(res, 'Room does not exist');
+            return;
+        }
+
+        const ownerUser = await prisma.user.findUnique({
+            where: {
+                id: owneruserId,
+                isCreator: true,
+                userRoomId: room.roomId
+            }
+        });
+
+        if (!ownerUser) {
+            console.log("Error starting quiz: User is not the creator of the room");
+            response_403(res, "User is not the creator of the room");
+            return;
+        }
+
+        io.to(roomCode).emit('quiz started', room.users.map(user => user.name));
+        await sendQuestions(roomCode, room.questions);
+
+        return response_200(res, 'Quiz started successfully');
+    } catch (e) {
+        console.error(`Error starting quiz: ${e}`);
+        response_500(res, `Error starting quiz`, e);
+    }
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+async function sendQuestions(roomCode, questions) {
+    const shuffledQuestions = shuffleArray(questions);
+    // question = {"questionId":2,"question":"Example Question 1","roomId":1,"options":[{"optionId":5,"option":"Correct Option","questionId":2,"isCorrect":true},{"optionId":6,"option":"Incorrect Option","questionId":2,"isCorrect":false},{"optionId":7,"option":"Incorrect Option","questionId":2,"isCorrect":false},{"optionId":8,"option":"Incorrect Option","questionId":2,"isCorrect":false}]}
+    for (const question of shuffledQuestions) {
+        io.to(roomCode).emit('display question', {
+            question: question.question,
+            questionId: question.questionId,
+            options: question.options.map((option) => {
+                return {
+                    optionId: option.optionId,
+                    option: option.option
+                };
+            })
+        });
+        await checkResponse(roomCode, question);
+    }
+    io.to(roomCode).emit('quiz ended');
+}
+
+async function checkResponse(roomCode, question) {
+    const correctAnswer = question.options.find((option) => option.isCorrect);
+    io.in(roomCode).fetchSockets().then((sockets) => {
+        for (const socket of sockets) {
+            const userId = socket.handshake.query.id;
+            socket.on('answer question', (data) => {
+                console.log(data);
+                if (data.questionId === question.questionId) {
+                    if (data.optionId === correctAnswer.optionId) {
+                        socket.emit('answer response', {
+                            wasCorrect: true,
+                            questionId: question.questionId,
+                            correctoptionId: correctAnswer.optionId,
+                            optionId: data.optionId
+                        });
+                        const user = prisma.user.findUnique({
+                            where: {
+                                id: userId
+                            }
+                        });
+                        user.then((user) => {
+                            if (user) {
+                                prisma.user.update({
+                                    where: {
+                                        id: userId
+                                    },
+                                    data: {
+                                        currPoints: user.currPoints + 10
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        socket.emit('answer response', {
+                            wasCorrect: false,
+                            questionId: question.questionId,
+                            correctoptionId: correctAnswer.optionId,
+                            optionId: data.optionId
+                        });
+                    }
+                }
+            });
+        }
+    });
+    await new Promise((resolve) => setTimeout(resolve, 10000))
+}
+
 export {
     removeUserFromRoom,
     addUserToRoom,
@@ -682,7 +802,8 @@ export {
     deleteRoom,
     disconnectUserFromRoom,
     transferOwnership,
-    acceptOrRejectPendingUser
+    acceptOrRejectPendingUser,
+    startQuiz
 };
 
 export const announce = async (req, res) => {

@@ -8,7 +8,8 @@ import {
     addUserToRoom,
     disconnectUserFromRoom,
     acceptOrRejectPendingUser,
-    announce
+    announce,
+    startQuiz
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 import prisma from '../../config/db.config.js';
@@ -23,6 +24,7 @@ roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
 roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
 roomRouter.post("/announce", authVerify, announce);
 roomRouter.delete("/delete/:roomCode",authVerify,deleteRoom)
+roomRouter.post("/startQuiz",authVerify,startQuiz)
 
 // just  testing routes for now can be upgraded later
 roomRouter.get('/', async (req, res) => {
