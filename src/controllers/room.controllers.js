@@ -711,6 +711,7 @@ async function leaderboardRoom(req, res) {
     }
 }
 
+
 async function startQuiz (req, res) {
     try {
         const roomCode = req.query.roomCode;
@@ -832,6 +833,7 @@ async function checkResponse(roomCode, question) {
     });
     await new Promise((resolve) => setTimeout(resolve, 10000))
 }
+
 
 export {
     removeUserFromRoom,
