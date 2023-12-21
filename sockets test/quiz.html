@@ -14,7 +14,6 @@
             jwt_token = document.getElementById('token').value;
             token = JSON.parse(window.atob(jwt_token.split('.')[1]));
             userId = token.userID;
-            console.log(userId);
             roomCode = document.getElementById('roomCode').value;
 
 

@@ -60,7 +60,6 @@ async function createRoom(req, res) {
         const sockets = await io.fetchSockets();
 
         for (const socket of sockets) {
-            console.log(socket.handshake.query);
             if (socket.handshake.query.id == req.user.id) {
                 socket.join(code);
                 socket.emit('room joined', code);
@@ -754,7 +753,8 @@ async function startQuiz(req, res) {
         );
         await sendQuestions(roomCode, room.questions);
 
-        return response_200(res, 'Quiz started successfully');
+        io.to(roomCode).emit('quiz ended');
+        return response_200(res, 'Quiz ended successfully');
     } catch (e) {
         console.error(`Error starting quiz: ${e}`);
         response_500(res, `Error starting quiz`, e);
@@ -783,9 +783,10 @@ async function sendQuestions(roomCode, questions) {
                 };
             })
         });
+        //wait for all necessary asynchronous operations in the checkResponse function to complete
+        //the promise resolution for setTimeout(10secs) at the end of checkResponse ensures that the next question is sent only after 10secs
         await checkResponse(roomCode, question);
     }
-    io.to(roomCode).emit('quiz ended');
 }
 
 async function checkResponse(roomCode, question) {
@@ -795,6 +796,8 @@ async function checkResponse(roomCode, question) {
         .then((sockets) => {
             for (const socket of sockets) {
                 const userId = socket.handshake.query.id;
+                //setting up an 'answer question' listener for each socket
+                //run for all questions.
                 socket.on('answer question', (data) => {
                     console.log(data);
                     if (data.questionId === question.questionId) {
@@ -805,23 +808,26 @@ async function checkResponse(roomCode, question) {
                                 correctoptionId: correctAnswer.optionId,
                                 optionId: data.optionId
                             });
-                            const user = prisma.user.findUnique({
-                                where: {
-                                    id: Number(userId)
-                                }
-                            });
-                            user.then((user) => {
+                            (async () => {
+                                const user = await prisma.user.findUnique({
+                                    where: {
+                                        id: Number(userId)
+                                    }
+                                });
                                 if (user) {
-                                    prisma.user.update({
+                                    const updated = await prisma.user.update({
                                         where: {
                                             id: Number(userId)
                                         },
                                         data: {
-                                            currPoints: user.currPoints + 10
+                                            currPoints: {
+                                                increment: 10
+                                            }
                                         }
                                     });
+                                    console.log(updated);
                                 }
-                            });
+                            })();
                         } else {
                             socket.emit('answer response', {
                                 wasCorrect: false,
