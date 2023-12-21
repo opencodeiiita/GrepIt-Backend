@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Quiz Testing</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        var roomCode;
+        let roomData = {};
+        var socket;
+        let socketId = '';
+
+        function joinRoom() {
+            jwt_token = document.getElementById('token').value;
+            token = JSON.parse(window.atob(jwt_token.split('.')[1]));
+            userId = token.userID;
+            console.log(userId);
+            roomCode = document.getElementById('roomCode').value;
+
+
+            socket = io('http://localhost:4001', {
+                query: {
+                    id: userId,
+                }
+            });
+
+            socket.on('connect', () => {
+                socketId = socket.id;
+                console.log(socketId);
+                fetch(`http://localhost:4000/api/v1/room/user/add?roomCode=${roomCode}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'authorization': document.getElementById('token').value,
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Success:', data);
+                        roomData = data.data;
+                        document.getElementById('roomCodeDisplay').innerHTML = roomData.code;
+                        document.getElementById('roomNameDisplay').innerHTML = roomData.roomName;
+                        document.getElementById('roomDescriptionDisplay').innerHTML = roomData.roomDescription;
+                        document.getElementById('roomIsInviteOnlyDisplay').innerHTML = roomData.isInviteOnly;
+                        document.getElementsByClassName('roomDetails')[0].hidden = false;
+                        socket.on('quiz started', (data) => {
+                            console.log(data);
+                            document.getElementById('quizNameDisplay').innerHTML = data;
+                        });
+                        socket.on('display question', (question) => {
+                            console.log(question);
+                            document.getElementById('questionDisplay').innerHTML = question.question;
+                            document.getElementById('optionsDisplay').innerHTML = question.options.map(option => `<button onClick="selectOption(${option.optionId},${question.questionId})" id="option-${option.optionId}">${option.option}</button>`).join('');
+                            document.getElementsByClassName('quizDetails')[0].hidden = false;
+                        })
+                        socket.on('answer response', (answer) => {
+                            console.log(answer);
+                            wasCorrect = answer.wasCorrect;
+                            optionelementid = `option-${answer.optionId}`;
+                            correctoptionelementid = `option-${answer.correctoptionId}`;
+                            console.log(optionelementid);
+                            document.getElementById(optionelementid).style.backgroundColor = wasCorrect ? 'green' : 'red';
+                            document.getElementById(correctoptionelementid).style.backgroundColor = 'green';
+                        })
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                    });
+            });
+        };
+        function leaveRoom() {
+            fetch(`http://localhost:4000/api/v1/room/user/disconnect?roomCode=${roomCode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': document.getElementById('token').value,
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                    document.getElementsByClassName('roomDetails')[0].hidden = true;
+                    document.getElementsByClassName('quizDetails')[0].hidden = true;
+                    socket.disconnect();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        };
+
+        function startQuiz() {
+            fetch(`http://localhost:4000/api/v1/room/startQuiz?roomCode=${roomCode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': document.getElementById('token').value,
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        };
+        function selectOption(optionId, questionId) {
+            socket.emit('answer question', {
+                optionId: optionId,
+                socketId: socketId,
+                roomCode: roomCode,
+                userId: userId,
+                questionId: questionId,
+            });
+        };
+    </script>
+</head>
+
+<body>
+    <h2>Quiz Testing</h2>
+    <h3>Enter the room code</h3>
+    <input type="text" id="roomCode">
+    <h3>Enter the token</h3>
+    <input type="text" id="token">
+    <button onclick="joinRoom()">Join Room</button>
+    <button onclick="leaveRoom()">Leave Room</button>
+    <button onclick="startQuiz()">Start Quiz</button>
+    <div class="roomDetails" hidden>
+        <h2>Room Details</h2>
+        <h3>Room Code: <span id="roomCodeDisplay"></span></h3>
+        <h3>Room Name: <span id="roomNameDisplay"></span></h3>
+        <h3>Room Description: <span id="roomDescriptionDisplay"></span></h3>
+        <h3>Room isInviteOnly: <span id="roomIsInviteOnlyDisplay"></span></h3>
+        <h4>Fellow Users: <span id="quizNameDisplay"></span>
+            <h4>
+    </div>
+    <div class="quizDetails" hidden>
+        <h2>Quiz Details</h2>
+        <h3>
+            Question: <span id="questionDisplay"></span>
+        </h3>
+        <h3>
+            Options: <span id="optionsDisplay"></span>
+        </h3>
+    </div>
+</body>
+
+</html>

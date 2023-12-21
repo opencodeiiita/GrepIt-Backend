@@ -9,7 +9,8 @@ import {
     disconnectUserFromRoom,
     acceptOrRejectPendingUser,
     announce,
-    leaderboardRoom
+    leaderboardRoom,
+    startQuiz
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 
@@ -24,6 +25,7 @@ roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
 roomRouter.post('/announce', authVerify, announce);
 roomRouter.delete('/delete', authVerify, deleteRoom);
 roomRouter.get('/leaderboard', authVerify, leaderboardRoom);
+roomRouter.post("/startQuiz", authVerify, startQuiz)
 
 export default roomRouter;
 
