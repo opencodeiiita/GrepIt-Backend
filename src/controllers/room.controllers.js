@@ -324,9 +324,7 @@ async function addUserToRoom(req, res) {
 
         const userInRoom = room.users.find((user) => user.id == userId);
         if (userInRoom) {
-            console.log(
-                'User is already in the room'
-            );
+            console.log('User is already in the room');
         }
 
         if (!room.isInviteOnly) {
@@ -347,7 +345,7 @@ async function addUserToRoom(req, res) {
             const sockets = await io.fetchSockets();
 
             for (const socket of sockets) {
-                console.log("User wants to join: " + socket.handshake.query.id);
+                console.log('User wants to join: ' + socket.handshake.query.id);
                 if (socket.handshake.query.id == req.user.id) {
                     socket.join(roomCode);
                     socket.emit('room joined', roomCode);
@@ -678,14 +676,14 @@ async function acceptOrRejectPendingUser(req, res) {
 
 async function leaderboardRoom(req, res) {
     try {
-        const roomCode = (req.query.roomCode);
+        const roomCode = req.query.roomCode;
         const room = await prisma.room.findUnique({
             where: {
                 code: roomCode
             },
             include: {
                 users: {
-                    orderBy: {currPoints: 'desc'},
+                    orderBy: { currPoints: 'desc' },
                     select: {
                         name: true,
                         currPoints: true
@@ -700,7 +698,7 @@ async function leaderboardRoom(req, res) {
             });
             return;
         }
-        const leaderboardData = room.users.map(user => ({
+        const leaderboardData = room.users.map((user) => ({
             name: user.name,
             points: user.currPoints
         }));
@@ -711,14 +709,13 @@ async function leaderboardRoom(req, res) {
     }
 }
 
-
-async function startQuiz (req, res) {
+async function startQuiz(req, res) {
     try {
         const roomCode = req.query.roomCode;
         const owneruserId = req.user.id;
         const room = await prisma.room.findUnique({
             where: {
-                code: roomCode,
+                code: roomCode
             },
             include: {
                 users: true,
@@ -738,19 +735,23 @@ async function startQuiz (req, res) {
 
         const ownerUser = await prisma.user.findUnique({
             where: {
-                id: owneruserId,
+                id: Number(owneruserId),
                 isCreator: true,
                 userRoomId: room.roomId
             }
         });
-
         if (!ownerUser) {
-            console.log("Error starting quiz: User is not the creator of the room");
-            response_403(res, "User is not the creator of the room");
+            console.log(
+                'Error starting quiz: User is not the creator of the room'
+            );
+            response_403(res, 'User is not the creator of the room');
             return;
         }
 
-        io.to(roomCode).emit('quiz started', room.users.map(user => user.name));
+        io.to(roomCode).emit(
+            'quiz started',
+            room.users.map((user) => user.name)
+        );
         await sendQuestions(roomCode, room.questions);
 
         return response_200(res, 'Quiz started successfully');
@@ -789,51 +790,52 @@ async function sendQuestions(roomCode, questions) {
 
 async function checkResponse(roomCode, question) {
     const correctAnswer = question.options.find((option) => option.isCorrect);
-    io.in(roomCode).fetchSockets().then((sockets) => {
-        for (const socket of sockets) {
-            const userId = socket.handshake.query.id;
-            socket.on('answer question', (data) => {
-                console.log(data);
-                if (data.questionId === question.questionId) {
-                    if (data.optionId === correctAnswer.optionId) {
-                        socket.emit('answer response', {
-                            wasCorrect: true,
-                            questionId: question.questionId,
-                            correctoptionId: correctAnswer.optionId,
-                            optionId: data.optionId
-                        });
-                        const user = prisma.user.findUnique({
-                            where: {
-                                id: userId
-                            }
-                        });
-                        user.then((user) => {
-                            if (user) {
-                                prisma.user.update({
-                                    where: {
-                                        id: userId
-                                    },
-                                    data: {
-                                        currPoints: user.currPoints + 10
-                                    }
-                                });
-                            }
-                        });
-                    } else {
-                        socket.emit('answer response', {
-                            wasCorrect: false,
-                            questionId: question.questionId,
-                            correctoptionId: correctAnswer.optionId,
-                            optionId: data.optionId
-                        });
+    io.in(roomCode)
+        .fetchSockets()
+        .then((sockets) => {
+            for (const socket of sockets) {
+                const userId = socket.handshake.query.id;
+                socket.on('answer question', (data) => {
+                    console.log(data);
+                    if (data.questionId === question.questionId) {
+                        if (data.optionId === correctAnswer.optionId) {
+                            socket.emit('answer response', {
+                                wasCorrect: true,
+                                questionId: question.questionId,
+                                correctoptionId: correctAnswer.optionId,
+                                optionId: data.optionId
+                            });
+                            const user = prisma.user.findUnique({
+                                where: {
+                                    id: Number(userId)
+                                }
+                            });
+                            user.then((user) => {
+                                if (user) {
+                                    prisma.user.update({
+                                        where: {
+                                            id: Number(userId)
+                                        },
+                                        data: {
+                                            currPoints: user.currPoints + 10
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            socket.emit('answer response', {
+                                wasCorrect: false,
+                                questionId: question.questionId,
+                                correctoptionId: correctAnswer.optionId,
+                                optionId: data.optionId
+                            });
+                        }
                     }
-                }
-            });
-        }
-    });
-    await new Promise((resolve) => setTimeout(resolve, 10000))
+                });
+            }
+        });
+    await new Promise((resolve) => setTimeout(resolve, 10000));
 }
-
 
 export {
     removeUserFromRoom,
