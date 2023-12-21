@@ -30,7 +30,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'authorization': document.getElementById('token').value,
+                        'authorization': 'Bearer ' + document.getElementById('token').value,
                     }
                 })
                     .then(response => response.json())
@@ -72,7 +72,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'authorization': document.getElementById('token').value,
+                    'authorization': 'Bearer ' + document.getElementById('token').value,
                 }
             })
                 .then(response => response.json())
@@ -92,7 +92,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'authorization': document.getElementById('token').value,
+                    'authorization': 'Bearer ' + document.getElementById('token').value,
                 }
             })
                 .then(response => response.json())

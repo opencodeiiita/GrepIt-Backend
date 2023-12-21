@@ -173,18 +173,11 @@ async function deleteRoom(req, res) {
         for (const socket of sockets) {
             if (socket.rooms.has(roomCode)) {
                 // If the socket is part of the room being deleted
-                for (const socketOfRoomCreator of socket) {
-                    // Sends message to room creator
-                    if (
-                        socketOfRoomCreator.handshake.query.id ===
-                        userOwnsRoom.id
-                    )
-                        socket
-                            .to(roomCode)
-                            .emit(
-                                'This room has been deleted',
-                                deletedRoom.roomName
-                            );
+
+                if (socket.handshake.query.id == userOwnsRoom.id) {
+                    socket
+                        .to(roomCode)
+                        .emit('room deleted', deletedRoom.roomName);
                 }
                 socket.leave(roomCode);
                 socket.disconnect(true); // Disconnect the socket
@@ -221,22 +214,13 @@ async function removeUserFromRoom(req, res) {
 
         const possibleCreator = await prisma.user.findUnique({
             where: {
-                id: req.user.id
+                id: req.user.id,
+                isCreator: true,
+                userRoomId: room.roomId
             }
         });
 
         if (!possibleCreator)
-            return response_403(
-                res,
-                "This User who claims to be the admin doesn't exist"
-            );
-
-        if (
-            !(
-                possibleCreator.isCreator &&
-                room.users.find((user) => user.id == req.user.id)
-            )
-        )
             return response_403(res, 'User is not the creator of the room');
 
         const userInRoom = room.users.find((user) => user.id == userId);
@@ -344,7 +328,6 @@ async function addUserToRoom(req, res) {
             const sockets = await io.fetchSockets();
 
             for (const socket of sockets) {
-                console.log('User wants to join: ' + socket.handshake.query.id);
                 if (socket.handshake.query.id == req.user.id) {
                     socket.join(roomCode);
                     socket.emit('room joined', roomCode);
@@ -400,34 +383,16 @@ async function disconnectUserFromRoom(req, res) {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId
+                id: userId,
+                userRoomId: room.roomId
             }
         });
         if (!user) {
-            console.log('Error removing user from room: User does not exist');
-            response_404(res, 'User does not exist');
-            return;
-        }
-
-        const userInRoom = room.users.find((user) => user.id == userId);
-        if (!userInRoom) {
             console.log(
-                'Error removing user from room: User is not in the room'
+                'Error removing user from room: User does not exist in the room'
             );
-            response_400(res, 'User is not in the room');
+            response_400(res, 'User does not exist in the room');
             return;
-        } else if (userInRoom.isCreator) {
-            const otherUsers = room.users.filter((user) => user.id != userId);
-            const randomUser =
-                otherUsers[Math.floor(Math.random() * otherUsers.length)];
-            await prisma.user.update({
-                where: {
-                    id: randomUser.id
-                },
-                data: {
-                    isCreator: true
-                }
-            });
         }
 
         const updatedRoom = await prisma.room.update({
@@ -442,6 +407,30 @@ async function disconnectUserFromRoom(req, res) {
                 }
             }
         });
+
+        let otherUsers;
+        let randomUser = null;
+        if (user.isCreator) {
+            otherUsers = updatedRoom.users;
+            randomUser =
+                otherUsers.length > 0
+                    ? otherUsers[Math.floor(Math.random() * otherUsers.length)]
+                    : null;
+            randomUser
+                ? await prisma.user.update({
+                      where: {
+                          id: randomUser.id
+                      },
+                      data: {
+                          isCreator: true
+                      }
+                  })
+                : await prisma.room.delete({
+                      where: {
+                          code: roomCode
+                      }
+                  });
+        }
 
         const sockets = await io.in(roomCode).fetchSockets();
 
@@ -489,13 +478,16 @@ async function transferOwnership(req, res) {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId
+                id: userId,
+                userRoomId: roomId
             }
         });
         if (!user) {
-            console.log('Error transferring ownership: User does not exist');
+            console.log(
+                'Error transferring ownership: User does not exist or is not present in the room'
+            );
             res.status(400).json({
-                error: 'User does not exist'
+                error: 'User does not exist or not in room'
             });
             return;
         }
@@ -515,32 +507,12 @@ async function transferOwnership(req, res) {
             return;
         }
 
-        const userInRoom = room.users.find((user) => user.id == userId);
-        if (!userInRoom) {
-            console.log(
-                'Error transferring ownership: User is not in the room'
-            );
-            res.status(400).json({
-                error: 'User is not in the room'
-            });
-            return;
-        }
-
-        const updatedRoom = await prisma.room.update({
+        const newOwner = await prisma.user.update({
             where: {
-                roomId: roomId
+                id: userId
             },
             data: {
-                users: {
-                    update: {
-                        where: {
-                            id: userId
-                        },
-                        data: {
-                            isCreator: true
-                        }
-                    }
-                }
+                isCreator: true
             }
         });
 
@@ -552,7 +524,7 @@ async function transferOwnership(req, res) {
                 isCreator: false
             }
         });
-        response_200(res, 'Ownership transferred successfully', updatedRoom);
+        response_200(res, 'Ownership transferred successfully', newOwner);
     } catch (e) {
         console.error(`Error transferring ownership: ${e}`);
         response_500(res, `Error transferring ownership`, e);
@@ -584,14 +556,15 @@ async function acceptOrRejectPendingUser(req, res) {
 
         const user = await prisma.user.findUnique({
             where: {
-                id: userId
+                id: userId,
+                userRoomId: roomId
             }
         });
         if (!user) {
             console.log(
-                'Error accepting/rejecting pending user: User does not exist'
+                'Error accepting/rejecting pending user: User does not exist or is not in the room'
             );
-            response_400(res, 'User does not exist');
+            response_400(res, 'User does not exist or not in room');
             return;
         }
 
@@ -607,15 +580,6 @@ async function acceptOrRejectPendingUser(req, res) {
                 'Error accepting/rejecting pending user: User is not the creator of the room'
             );
             response_403(res, 'User is not the creator of the room');
-            return;
-        }
-
-        const userInRoom = room.users.find((user) => user.id == userId);
-        if (userInRoom) {
-            console.log(
-                'Error accepting/rejecting pending user: User is already in the room'
-            );
-            response_400(res, 'User is already in the room');
             return;
         }
 

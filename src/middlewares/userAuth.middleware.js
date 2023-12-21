@@ -25,7 +25,7 @@ function extractPayloadFromToken(decodedToken) {
 }
 
 function authVerify(req, res, next) {
-    const token = req.headers.authorization;
+    const token = req.headers.authorization.split(' ')[1];
     try {
         const decoded = verifyToken(token);
         const payload = extractPayloadFromToken(decoded);
