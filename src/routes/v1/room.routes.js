@@ -9,10 +9,10 @@ import {
     disconnectUserFromRoom,
     acceptOrRejectPendingUser,
     announce,
+    leaderboardRoom,
     startQuiz
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
-import prisma from '../../config/db.config.js';
 
 const roomRouter = express.Router();
 
@@ -22,15 +22,10 @@ roomRouter.patch('/update', authVerify, updateRoom);
 roomRouter.post('/user/add', authVerify, addUserToRoom);
 roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
 roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
-roomRouter.post("/announce", authVerify, announce);
-roomRouter.delete("/delete/:roomCode",authVerify,deleteRoom)
-roomRouter.post("/startQuiz",authVerify,startQuiz)
-
-// just  testing routes for now can be upgraded later
-roomRouter.get('/', async (req, res) => {
-    const rooms = await prisma.room.findMany();
-    return res.json(rooms);
-});
+roomRouter.post('/announce', authVerify, announce);
+roomRouter.delete('/delete', authVerify, deleteRoom);
+roomRouter.get('/leaderboard', authVerify, leaderboardRoom);
+roomRouter.post("/startQuiz", authVerify, startQuiz)
 
 export default roomRouter;
 

@@ -77,6 +77,33 @@
     }
     ```
 
+  - `GET /api/v1/room/leaderboard/:roomCode` Leaderboard a room
+
+      **Header:**
+      authorization:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0
+
+      **Response:**
+      ```json
+      {
+          "status": "OK",
+          "message": "Leaderboard Details",
+          "data": [
+              {
+                  "name": "wadad",
+                  "points": 40
+              },
+              {
+                  "name": "test",
+                  "points": 30
+              },
+              {
+                  "name": "test2",
+                  "points": 20
+              }
+          ]
+      }
+      ```
+
   - `POST /api/v1/room/user/pending?roomId=<roomID>&userId=<userId>&action=<accept/reject>` Accept/Reject Pending Users
 
     **Header**
