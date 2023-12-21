@@ -5,12 +5,12 @@ async function addMultipleChoiceQuestion(req, res) {
     try {
         const question = req.body.question;
         const options = req.body.options;
-        const roomId = req.query.roomId;
+        const roomCode = req.query.roomCode;
 
         const newQuestion = await prisma.question.create({
             data: {
                 question,
-                roomId: Number(roomId),
+                roomId: Number(roomCode),
                 options: {
                     createMany: {
                         data: options.map((option) => ({
