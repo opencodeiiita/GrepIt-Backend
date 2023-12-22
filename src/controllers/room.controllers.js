@@ -864,3 +864,136 @@ export const announce = async (req, res) => {
     }
 };
 
+export const getRoom = async (req, res) => {
+    try {
+        const { code } = req.body;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: code
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            return response_404(res, 'Room not found');
+        }
+
+        return response_200(res, 'Room found', {
+            roomId: room.roomId,
+            roomName: room.roomName,
+            roomDescription: room.roomDescription,
+            code: room.code,
+            isInviteOnly: room.isInviteOnly,
+            users: room.users.map((user) => {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email
+                };
+            })
+        });
+    } catch (err) {
+        return response_500(res, 'Error getting room', err);
+    }
+};
+
+export const getRooms = async (req, res) => {
+    try {
+        const rooms = await prisma.room.findMany({
+            include: {
+                users: true
+            }
+        });
+
+        return response_200(res, 'Rooms found', {
+            rooms: rooms.map((room) => {
+                return {
+                    roomId: room.roomId,
+                    roomName: room.roomName,
+                    roomDescription: room.roomDescription,
+                    code: room.code,
+                    isInviteOnly: room.isInviteOnly,
+                    users: room.users.map((user) => {
+                        return {
+                            id: user.id,
+                            name: user.name,
+                            email: user.email
+                        };
+                    })
+                };
+            })
+        });
+    } catch (err) {
+        return response_500(res, 'Error getting rooms', err);
+    }
+};
+
+export const getRoomUsers = async (req, res) => {
+    try {
+        const { code } = req.body;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: code
+            },
+            include: {
+                users: true
+            }
+        });
+
+        if (!room) {
+            return response_404(res, 'Room not found');
+        }
+
+        return response_200(res, 'Users fetched successfully', {
+            users: room.users.map((user) => {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                    currPoints: user.currPoints,
+                    userRoomId: user.userRoomId,
+                    isCreator: user.isCreator
+                };
+            })
+        });
+    } catch (err) {
+        return response_500(res, 'Error getting users', err);
+    }
+};
+
+export const getRoomPendingUsers = async (req, res) => {
+    try {
+        const { code } = req.body;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: code
+            },
+            include: {
+                pending: true
+            }
+        });
+
+        if (!room) {
+            return response_404(res, 'Room not found');
+        }
+
+        return response_200(res, 'Pending users found', {
+            pending: room.pending.map((user) => {
+                return {
+                    id: user.id,
+                    name: user.name,
+                    email: user.email,
+                };
+            })
+        });
+    } catch (err) {
+        return response_500(res, 'Error getting pending users', err);
+    }
+};
+
+
