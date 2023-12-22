@@ -10,7 +10,11 @@ import {
     acceptOrRejectPendingUser,
     announce,
     leaderboardRoom,
-    startQuiz
+    startQuiz,
+    getRoom,
+    getRooms,
+    getRoomUsers,
+    getRoomPendingUsers,
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 
@@ -26,6 +30,10 @@ roomRouter.post('/announce', authVerify, announce);
 roomRouter.delete('/delete', authVerify, deleteRoom);
 roomRouter.get('/leaderboard', authVerify, leaderboardRoom);
 roomRouter.post("/startQuiz", authVerify, startQuiz)
+roomRouter.get('/getroom', authVerify, getRoom);
+roomRouter.get('/getrooms', authVerify, getRooms);
+roomRouter.get('/getroomusers', authVerify, getRoomUsers);
+roomRouter.get('/getroompendingusers', authVerify, getRoomPendingUsers);
 
 export default roomRouter;
 
