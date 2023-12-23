@@ -76,15 +76,19 @@
             socket.on("user removed", function (name) {
                 window.alert(name + " was kicked from the room");
             })
+
+            socket.on("send message", function (message) {
+                console.log(message);
+            });
         }
 
 
         function joinRoom() {
+            roomCode = document.getElementById('roomCode').value;
 
             console.log(roomCode, socketId);
             // Making a request to the server
 
-            roomCode = document.getElementById('roomCode').value;
             socket = io('http://localhost:4001/', {
                 query: {
                     id: Number(document.getElementById('userId').value)
@@ -146,9 +150,12 @@
 
             socket.on("user removed", function (name) {
                 window.alert(name + " was kicked from the room");
-            })
-        }
+            });
 
+            socket.on("send message", function (message) {
+                console.log(message);
+            });
+        }
     </script>
 
     <script>
@@ -188,6 +195,28 @@
                     console.error('Error:', error);
                 });
         }
+
+        function sendMessage() {
+            roomCode = document.getElementById('roomCode').value;
+            fetch(`http://localhost:4000/api/v1/room/message/send`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': 'Bearer ' + document.getElementById('token').value,
+                },
+                body: JSON.stringify({
+                    message: document.getElementById('message').value,
+                    roomCode: roomCode
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
     </script>
 </head>
 
@@ -196,10 +225,12 @@
     <input id="token" type="text" placeholder="auth Token"><br>
     <input id="userId" type="text" placeholder="userId"><br>
     <input id="kick" type="text" placeholder="kick"><br>
+    <input id="message" type="text" placeholder="message"><br>
     <button onclick="createRoom()">Create Room</button>
     <button onclick="joinRoom()">Join Room</button>
     <button onclick="leaveRoom()">Leave Room</button>
     <button onclick="kick()">Kick from Room</button>
+    <button onclick="sendMessage()">Send Message</button>
 </body>
 
 </html>

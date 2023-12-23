@@ -60,7 +60,6 @@ export function response_500(res, log_message, err) {
 
     return res.status(500).json({
         status: 'error',
-        error: `Something went wrong.\n${message}`,
         message: "Internal server error"
     });
 }

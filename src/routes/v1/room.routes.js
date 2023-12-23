@@ -15,25 +15,30 @@ import {
     getRooms,
     getRoomUsers,
     getRoomPendingUsers,
+    sendMessageAfterQuiz
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 
 const roomRouter = express.Router();
 
-roomRouter.post('/create', authVerify, createRoom);
-roomRouter.post('/user/remove', authVerify, removeUserFromRoom);
-roomRouter.patch('/update', authVerify, updateRoom);
-roomRouter.post('/user/add', authVerify, addUserToRoom);
-roomRouter.post('/user/disconnect', authVerify, disconnectUserFromRoom);
-roomRouter.post('/user/pending', authVerify, acceptOrRejectPendingUser);
-roomRouter.post('/announce', authVerify, announce);
-roomRouter.delete('/delete', authVerify, deleteRoom);
-roomRouter.get('/leaderboard', authVerify, leaderboardRoom);
-roomRouter.post("/startQuiz", authVerify, startQuiz)
-roomRouter.get('/getroom', authVerify, getRoom);
-roomRouter.get('/getrooms', authVerify, getRooms);
-roomRouter.get('/getroomusers', authVerify, getRoomUsers);
-roomRouter.get('/getroompendingusers', authVerify, getRoomPendingUsers);
+roomRouter.use(authVerify);
+
+roomRouter.post('/create', createRoom);
+roomRouter.post('/user/remove', removeUserFromRoom);
+roomRouter.patch('/update', updateRoom);
+roomRouter.post('/user/add', addUserToRoom);
+roomRouter.post('/user/disconnect', disconnectUserFromRoom);
+roomRouter.post('/user/pending', acceptOrRejectPendingUser);
+roomRouter.post('/announce', announce);
+roomRouter.delete('/delete', deleteRoom);
+roomRouter.get('/leaderboard', leaderboardRoom);
+roomRouter.post("/startQuiz", startQuiz);
+roomRouter.post("/message/send", sendMessageAfterQuiz);
+roomRouter.get('/getroom', getRoom);
+roomRouter.get('/getrooms', getRooms);
+roomRouter.get('/getroomusers', getRoomUsers);
+roomRouter.get('/getroompendingusers', getRoomPendingUsers);
+
 
 export default roomRouter;
 

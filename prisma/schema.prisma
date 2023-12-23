@@ -14,15 +14,16 @@ model Init {
 }
 
 model User {
-  id           Int     @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   name         String
-  email        String  @unique
+  email        String    @unique
   password     String
-  currPoints   Int     @default(0)
-  userRoom     Room?   @relation("RoomToUsers", fields: [userRoomId], references: [roomId])
+  currPoints   Int       @default(0)
+  userRoom     Room?     @relation("RoomToUsers", fields: [userRoomId], references: [roomId])
   userRoomId   Int?
-  pendingRooms Room[]  @relation("RoomToPendingUsers")
-  isCreator    Boolean @default(false)
+  pendingRooms Room[]    @relation("RoomToPendingUsers")
+  isCreator    Boolean   @default(false)
+  messages     Message[] @relation("UserToMessages")
 
   @@index([userRoomId], name: "userRoomId")
 }
@@ -56,4 +57,17 @@ model Room {
   questions       Question[] @relation("RoomToQuestions")
   pending         User[]     @relation("RoomToPendingUsers")
   users           User[]     @relation("RoomToUsers")
+  messages        Message[]  @relation("RoomToMessages")
+}
+
+model Message {
+  messageId Int    @id @default(autoincrement())
+  message   String
+  user      User   @relation("UserToMessages", fields: [userId], references: [id])
+  userId    Int
+  room      Room   @relation("RoomToMessages", fields: [roomId], references: [roomId])
+  roomId    Int
+
+  @@index([userId], name: "id")
+  @@index([roomId], name: "roomId")
 }

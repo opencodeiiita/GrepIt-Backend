@@ -4,11 +4,11 @@
 
 -   Authentication Routes:
 
-    -   `POST /api/v1/auth/register:` Register a new user.
+    -   `POST /api/v1/auth/register` Register a new user.
 
         ```json
         {
-            "username": "test",
+            "name": "test",
             "password": "test",
             "email": "test@gmail.com"
         }
@@ -31,7 +31,7 @@
         }
         ```
 
-    -   `POST /api/v1/auth/login:` Login as a user.
+    -   `POST /api/v1/auth/login` Login as a user.
         ```json
         {
             "email": "test@gmail.com",
@@ -54,7 +54,7 @@
 
 -   Room Routes:
 
-    -   `POST /api/v1/room/create:` Create a room
+    -   `POST /api/v1/room/create` Create a room
 
         **Header:**
         authorization: "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0"
@@ -125,12 +125,12 @@
         }
         ```
 
-        -   `POST /api/v1/room/announce` Announce in a room
+    -   `POST /api/v1/room/announce` Announce in a room
 
         **Header**
         Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
 
-    -   ```json
+        ```json
         {
             "code": 1,
             "message": "Hello World"
@@ -143,134 +143,154 @@
             "message": "Announcement sent"
         }
         ```
-- `GET /api/v1/room/getroomusers` Get all the users of the room
 
-  **Header**
-  Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+    -   `POST /api/v1/room/message/send` Send a message
 
-     ```json
-    {
-        "code": "z9cdTCAAAn"
-    }
-    ```
-  **Response**
-    ```json
-    {
-      "status": "OK",
-      "message": "Users fetched successfully",
-      "data":{
-    "users": [
-            {
-              "id": 3,
-              "name": "test user",
-              "email": "test1@gmail.com",
-              "currPoints": 0,
-              "userRoomId": 1,
-              "isCreator": "true"
-            },
-            {
-              "id": 4,
-              "name": "test user two",
-              "email": "test2@gmail.com",
-              "currPoints": 0,
-              "userRoomId": 1,
-              "isCreator": "false"
-            }
-         ]
-       }
-    }
-    ```
+        **Header**
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
 
-  - `GET /api/v1/room/getpendingusers` Get all the pending users of the room
+        ```json
+        {
+            "roomCode": "OuEEwHtmFX",
+            "message": "Hello World"
+        }
+        ```
+        **Response**
+        ```json
+        {
+            "status": "OK",
+            "message": "Message sent successfully",
+        }
+        ```
 
-    **Header**
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+    -   `GET /api/v1/room/getroomusers` Get all the users of the room
 
-     ```json
-    {
-        "code": "z9cdTCAAAn"
-    }
-    ```
-    **Response**
-    ```json
-    {
-      "status": "OK",
-      "message": "Pending users found",
-      "data": {
-         "pending": [
-            {
-              "id": 8,
-              "name": "test user",
-              "email": "test@gmail.com"
-            },
-            {
-              "id": 9,
-              "name": "test",
-              "email": "test9@gmail.com"
-            }
-         ]
-      }
-    }
-    ```
+        **Header**
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
 
-  - `GET /api/v1/room/getrooms` Get all the rooms
-
-    **Header**
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
-
-    **Response**
-    ```json
-    {
-      "status": "OK",
-      "message": "Rooms found",
-      "data": {
-         "rooms": [
-            {
-              "id": 1,
-              "name": "test room",
-              "description": "test room description",
-              "code": "z9cdTCAAAn",
-              "isInviteOnly": "false",
-              "users": [
+        ```json
+        {
+            "code": "z9cdTCAAAn"
+        }
+        ```
+        **Response**
+        ```json
+        {
+          "status": "OK",
+          "message": "Users fetched successfully",
+          "data":{
+            "users": [
                 {
                   "id": 3,
                   "name": "test user",
-                  "email": "test@gmail.com"
-            }]
-            }
-         ]
-      }
-    }
-    ```
-
-  - `GET /api/v1/room/getroom` Get the specific room for the corresponding code
-
-    **Header**
-    Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
-    ```json
-    {
-    "code": "z9cdTCAAAn"
-    }
-    ```
-    **Response**
-    ```json
-    {
-      "status": "OK",
-      "message": "Room found",
-      "data":{
-              "id": 1,
-              "name": "test room",
-              "description": "test room description",
-              "code": "z9cdTCAAAn",
-              "isInviteOnly": "false",
-              "users": [
+                  "email": "test1@gmail.com",
+                  "currPoints": 0,
+                  "userRoomId": 1,
+                  "isCreator": "true"
+                },
                 {
-                  "id": 3,
-                  "name": "test user",
-                  "email": "test@gmail.com"
+                  "id": 4,
+                  "name": "test user two",
+                  "email": "test2@gmail.com",
+                  "currPoints": 0,
+                  "userRoomId": 1,
+                  "isCreator": "false"
                 }
-              ]
-            }
+            ]
+          }
+        }
+        ```
 
-      }
-    ```
+    -   `GET /api/v1/room/getpendingusers` Get all the pending users of the room
+
+        **Header**
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+
+        ```json
+        {
+            "code": "z9cdTCAAAn"
+        }
+        ```
+        **Response**
+        ```json
+        {
+          "status": "OK",
+          "message": "Pending users found",
+          "data": {
+            "pending": [
+                {
+                  "id": 8,
+                  "name": "test user",
+                  "email": "test@gmail.com"
+                },
+                {
+                  "id": 9,
+                  "name": "test",
+                  "email": "test9@gmail.com"
+                }
+            ]
+          }
+        }
+        ```
+
+    -   `GET /api/v1/room/getrooms` Get all the rooms
+
+        **Header**
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+
+        **Response**
+        ```json
+        {
+          "status": "OK",
+          "message": "Rooms found",
+          "data": {
+            "rooms": [
+                {
+                  "id": 1,
+                  "name": "test room",
+                  "description": "test room description",
+                  "code": "z9cdTCAAAn",
+                  "isInviteOnly": "false",
+                  "users": [
+                    {
+                      "id": 3,
+                      "name": "test user",
+                      "email": "test@gmail.com"
+                }]
+                }
+            ]
+          }
+        }
+        ```
+
+    -   `GET /api/v1/room/getroom` Get the specific room for the corresponding code
+
+        **Header**
+        Authorization: `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySUQiOjMsInVzZXJOYW1lIjoiSm9obiBEb2UiLCJpc0NyZWF0b3IiOiJ0cnVlIn0.04c7ahmthIfzSg0vwRHCohZjHXIP2x6bPNNqiO9zENM`
+        ```json
+        {
+        "code": "z9cdTCAAAn"
+        }
+        ```
+        **Response**
+        ```json
+        {
+          "status": "OK",
+          "message": "Room found",
+          "data":{
+                  "id": 1,
+                  "name": "test room",
+                  "description": "test room description",
+                  "code": "z9cdTCAAAn",
+                  "isInviteOnly": "false",
+                  "users": [
+                    {
+                      "id": 3,
+                      "name": "test user",
+                      "email": "test@gmail.com"
+                    }
+                  ]
+                }
+
+          }
+        ```
