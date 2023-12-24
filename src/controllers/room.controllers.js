@@ -206,9 +206,7 @@ async function removeUserFromRoom(req, res) {
 
         if (!room) {
             console.log('Error removing user from room: Room does not exist');
-            res.status(400).json({
-                error: 'Room does not exist'
-            });
+            response_400(res, 'Room does not exist');
             return;
         }
 
@@ -228,9 +226,8 @@ async function removeUserFromRoom(req, res) {
             console.log(
                 'Error removing user from room: User is not in the room'
             );
-            return res.status(400).json({
-                error: 'User is not in the room'
-            });
+            response_400(res, 'User is not in the room');
+            return;
         }
 
         const updatedRoom = await prisma.room.update({
@@ -807,6 +804,92 @@ async function checkResponse(roomCode, question) {
     await new Promise((resolve) => setTimeout(resolve, 10000));
 }
 
+async function sendMessageAfterQuiz(req, res) {
+    console.log("someone sending message")
+    try {
+        const roomCode = req.body.roomCode;
+        const userId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode
+            },
+            include: {
+                users: true,
+                messages: true
+            }
+        });
+
+        if (!room) {
+            console.log('Error removing user from room: Room does not exist');
+            response_400(res, 'Room does not exist');
+            return;
+        }
+
+        const messageSender = await prisma.user.findUnique({
+            where: {
+                id: userId
+            }
+        });
+
+        if (!messageSender) {
+            console.log('Error removing user from room: User does not exist');
+            response_400(res, 'User does not exist');
+            return;
+        }
+
+        const userInRoom = room.users.find((user) => user.id == userId);
+        if (!userInRoom) {
+            console.log(
+                'Error removing user from room: User is not in the room'
+            );
+            response_400(res, 'User is not in the room');
+            return;
+        }
+
+        const message = await prisma.message.create({
+            data: {
+                message: req.body.message,
+                user: {
+                    connect: {
+                        id: userId
+                    }
+                },
+                room: {
+                    connect: {
+                        roomId: room.roomId
+                    }
+                }
+            }
+        });
+
+        await prisma.room.update({
+            where: {
+                roomId: room.roomId
+            },
+            data: {
+                messages: {
+                    connect: {
+                        messageId: message.messageId
+                    }
+                }
+            }
+        });
+
+        io.to(roomCode).emit('send message', {
+            message: message.message,
+            sender: messageSender.name
+        });
+
+        console.log('Message sent successfully');
+        return response_200(res, 'Message sent successfully');
+
+    } catch (e) {
+        response_500(res, 'Error sending message', e);
+    }
+}
+
+
 export {
     removeUserFromRoom,
     addUserToRoom,
@@ -817,7 +900,8 @@ export {
     transferOwnership,
     acceptOrRejectPendingUser,
     leaderboardRoom,
-    startQuiz
+    startQuiz,
+    sendMessageAfterQuiz
 };
 
 export const announce = async (req, res) => {
