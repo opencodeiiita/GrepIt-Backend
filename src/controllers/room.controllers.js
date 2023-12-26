@@ -100,7 +100,7 @@ async function updateRoom(req, res) {
         const userOwnsRoom = await prisma.user.findUnique({
             where: {
                 id: req.user.id,
-                userRoomCode: roomCode,
+                roomCode: roomCode,
                 isCreator: true
             }
         });
@@ -149,7 +149,7 @@ async function updateRoom(req, res) {
         const userOwnsRoom = await prisma.user.findUnique({
             where: {
                 id: req.user.id,
-                userRoomCode: roomCode,
+                roomCode: roomCode,
                 isCreator: true
             }
         });
@@ -214,7 +214,7 @@ async function updateRoom(req, res) {
             where: {
                 id: req.user.id,
                 isCreator: true,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
  
@@ -381,7 +381,7 @@ async function disconnectUserFromRoom(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!user) {
@@ -476,7 +476,7 @@ async function disconnectUserFromRoom(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!user) {
@@ -493,7 +493,7 @@ async function disconnectUserFromRoom(req, res) {
             where: {
                 id: owneruserId,
                 isCreator: true,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!ownerUser) {
@@ -554,7 +554,7 @@ async function disconnectUserFromRoom(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!user) {
@@ -569,7 +569,7 @@ async function disconnectUserFromRoom(req, res) {
             where: {
                 id: owneruserId,
                 isCreator: true,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!ownerUser) {
@@ -697,7 +697,7 @@ async function startQuiz(req, res) {
             where: {
                 id: Number(owneruserId),
                 isCreator: true,
-                userRoomCode: roomCode
+                roomCode: roomCode
             }
         });
         if (!ownerUser) {
