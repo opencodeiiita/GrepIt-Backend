@@ -4,7 +4,7 @@ import {
     createRoom,
     removeUserFromRoom,
     updateRoom,
-    deleteRoom,
+    closeRoom,
     addUserToRoom,
     disconnectUserFromRoom,
     acceptOrRejectPendingUser,
@@ -15,7 +15,7 @@ import {
     getRooms,
     getRoomUsers,
     getRoomPendingUsers,
-    sendMessageAfterQuiz
+    sendMessageAfterQuiz,
 } from '../../controllers/room.controllers.js';
 import { authVerify } from '../../middlewares/userAuth.middleware.js';
 
@@ -30,7 +30,7 @@ roomRouter.post('/user/add', addUserToRoom);
 roomRouter.post('/user/disconnect', disconnectUserFromRoom);
 roomRouter.post('/user/pending', acceptOrRejectPendingUser);
 roomRouter.post('/announce', announce);
-roomRouter.delete('/delete', deleteRoom);
+roomRouter.patch('/close', closeRoom);
 roomRouter.get('/leaderboard', leaderboardRoom);
 roomRouter.post("/startQuiz", startQuiz);
 roomRouter.post("/message/send", sendMessageAfterQuiz);

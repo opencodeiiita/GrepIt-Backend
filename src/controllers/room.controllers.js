@@ -60,7 +60,7 @@ async function createRoom(req, res) {
         const sockets = await io.fetchSockets();
 
         for (const socket of sockets) {
-            if (socket.handshake.query.id == req.user.id) {
+            if (socket.handshake.query.id === req.user.id) {
                 socket.join(code);
                 socket.emit('room joined', code);
                 break;
@@ -129,7 +129,7 @@ async function updateRoom(req, res) {
     }
 }
 
-async function deleteRoom(req, res) {
+async function closeRoom(req, res) {
     try {
         const roomCode = req.query.roomCode;
 
@@ -161,7 +161,20 @@ async function deleteRoom(req, res) {
             return;
         }
 
-        const deletedRoom = await prisma.room.delete({
+        // Remove all users from the room and close it
+        await prisma.room.update({
+            where: {
+                code: roomCode
+            },
+            data: {
+                isClosed: true,
+                users: {
+                    set: []
+                }
+            }
+        });
+
+        const updatedRoom = await prisma.room.findUnique({
             where: {
                 code: roomCode
             }
@@ -174,19 +187,19 @@ async function deleteRoom(req, res) {
             if (socket.rooms.has(roomCode)) {
                 // If the socket is part of the room being deleted
 
-                if (socket.handshake.query.id == userOwnsRoom.id) {
+                if (socket.handshake.query.id === userOwnsRoom.id) {
                     socket
                         .to(roomCode)
-                        .emit('room deleted', deletedRoom.roomName);
+                        .emit('room closed', updatedRoom.roomName);
                 }
                 socket.leave(roomCode);
                 socket.disconnect(true); // Disconnect the socket
             }
         }
 
-        return response_200(res, 'Room deleted successfully');
+        return response_200(res, 'Room Closed successfully');
     } catch (error) {
-        response_500(res, 'Error deleting room', error);
+        response_500(res, 'Error closing room', error);
     }
 }
 
@@ -221,7 +234,7 @@ async function removeUserFromRoom(req, res) {
         if (!possibleCreator)
             return response_403(res, 'User is not the creator of the room');
 
-        const userInRoom = room.users.find((user) => user.id == userId);
+        const userInRoom = room.users.find((user) => user.id === userId);
         if (!userInRoom) {
             console.log(
                 'Error removing user from room: User is not in the room'
@@ -253,7 +266,7 @@ async function removeUserFromRoom(req, res) {
         });
 
         for (const socket of sockets) {
-            if (socket.handshake.query.id == userId) {
+            if (socket.handshake.query.id === userId) {
                 socket.to(roomCode).emit('user removed', user.name);
                 socket.leave(roomCode);
                 socket.disconnect(true);
@@ -264,7 +277,7 @@ async function removeUserFromRoom(req, res) {
         return response_200(
             res,
             'User removed from room successfully',
-            updatedRoom
+            { updatedRoom }
         );
     } catch (e) {
         console.error(`Error removing user from room: ${e}`);
@@ -291,6 +304,10 @@ async function addUserToRoom(req, res) {
             return;
         }
 
+        if(room.isClosed){
+            return response_403(res, 'Room is closed');
+        }
+
         const user = await prisma.user.findUnique({
             where: {
                 id: userId
@@ -302,7 +319,7 @@ async function addUserToRoom(req, res) {
             return;
         }
 
-        const userInRoom = room.users.find((user) => user.id == userId);
+        const userInRoom = room.users.find((user) => user.id === userId);
         if (userInRoom) {
             console.log('User is already in the room');
         }
@@ -325,7 +342,7 @@ async function addUserToRoom(req, res) {
             const sockets = await io.fetchSockets();
 
             for (const socket of sockets) {
-                if (socket.handshake.query.id == req.user.id) {
+                if (socket.handshake.query.id === req.user.id) {
                     socket.join(roomCode);
                     socket.emit('room joined', roomCode);
                     socket.to(roomCode).emit('new join', user.name);
@@ -422,17 +439,20 @@ async function disconnectUserFromRoom(req, res) {
                           isCreator: true
                       }
                   })
-                : await prisma.room.delete({
-                      where: {
-                          code: roomCode
-                      }
+                : await prisma.room.update({
+                        where: {
+                            code: roomCode
+                        },
+                        data: {
+                            isClosed: true
+                        }
                   });
         }
 
         const sockets = await io.in(roomCode).fetchSockets();
 
         for (const socket of sockets) {
-            if (socket.handshake.query.id == req.user.id) {
+            if (socket.handshake.query.id === req.user.id) {
                 socket.to(roomCode).emit('user left', user.name);
                 socket.leave(roomCode);
                 socket.disconnect(true);
@@ -895,7 +915,7 @@ export {
     addUserToRoom,
     createRoom,
     updateRoom,
-    deleteRoom,
+    closeRoom,
     disconnectUserFromRoom,
     transferOwnership,
     acceptOrRejectPendingUser,
@@ -971,6 +991,7 @@ export const getRoom = async (req, res) => {
             roomDescription: room.roomDescription,
             code: room.code,
             isInviteOnly: room.isInviteOnly,
+            isClosed: room.isClosed,
             users: room.users.map((user) => {
                 return {
                     id: user.id,
@@ -1000,6 +1021,7 @@ export const getRooms = async (req, res) => {
                     roomDescription: room.roomDescription,
                     code: room.code,
                     isInviteOnly: room.isInviteOnly,
+                    isClosed: room.isClosed,
                     users: room.users.map((user) => {
                         return {
                             id: user.id,
