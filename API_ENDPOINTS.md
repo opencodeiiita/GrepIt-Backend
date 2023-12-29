@@ -69,7 +69,7 @@
         }
         ```
 
-    -   `DELETE /api/v1/room/:roomCode` Delete a room
+    -   `PATCH /api/v1/room/:roomCode` Close a room
 
         **Header:**
         authorization: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7Im5hbWUiOiJ0ZXN0IiwiaWQiOjEyfX0.Q50hTNdo7Kif8fgS0ClBoPbNCQ1x4HKHk1auIP0CwR0'
@@ -79,7 +79,7 @@
         ```json
         {
             "status": "OK",
-            "message": "Room deleted successfully"
+            "message": "Room Closed successfully"
         }
         ```
 

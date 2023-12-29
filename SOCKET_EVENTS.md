@@ -55,8 +55,8 @@
     - Emitted when user creates a room
     - Returns the code
 
-4) room deleted
-    - Emitted when room gets deleted
+4) room closed
+    - Emitted when room gets closed
     - Can only be done by room creator
     - Returns roomName
 
