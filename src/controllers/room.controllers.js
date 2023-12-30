@@ -535,7 +535,7 @@ async function acceptOrRejectPendingUser(req, res) {
 
         const room = await prisma.room.findUnique({
             where: {
-                roomId: roomCode
+                code: roomCode
             },
             include: {
                 users: true,
