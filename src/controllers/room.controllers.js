@@ -80,15 +80,14 @@ async function createRoom(req, res) {
 
 async function updateRoom(req, res) {
     try {
-        const roomId = parseInt(req.query.roomId);
+        const roomCode = req.query.roomCode;
         const { roomName, roomDescription } = req.body;
 
         const room = await prisma.room.findUnique({
             where: {
-                roomId: roomId
+                code: roomCode
             }
         });
-
         if (!room) {
             console.log('Error updating room: Room does not exist');
             res.status(400).json({
@@ -100,7 +99,7 @@ async function updateRoom(req, res) {
         const userOwnsRoom = await prisma.user.findUnique({
             where: {
                 id: req.user.id,
-                userRoomId: roomId,
+                userRoomId: room.roomId,
                 isCreator: true
             }
         });
@@ -114,7 +113,7 @@ async function updateRoom(req, res) {
 
         const updatedRoom = await prisma.room.update({
             where: {
-                roomId: roomId
+                roomId: room.roomId
             },
             data: {
                 roomName: roomName,
@@ -472,13 +471,13 @@ async function disconnectUserFromRoom(req, res) {
 
 async function transferOwnership(req, res) {
     try {
-        const roomId = parseInt(req.query.roomId);
+        const roomCode = req.query.roomCode;
         const userId = parseInt(req.query.userId);
         const owneruserId = req.user.id;
 
         const room = await prisma.room.findUnique({
             where: {
-                roomId: roomId
+                code: roomCode
             },
             include: {
                 users: true
@@ -496,7 +495,7 @@ async function transferOwnership(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
-                userRoomId: roomId
+                userRoomId: room.roomId
             }
         });
         if (!user) {
@@ -513,7 +512,7 @@ async function transferOwnership(req, res) {
             where: {
                 id: owneruserId,
                 isCreator: true,
-                roomId: roomId
+                roomId: room.roomId
             }
         });
         if (!ownerUser) {
@@ -550,13 +549,13 @@ async function transferOwnership(req, res) {
 
 async function acceptOrRejectPendingUser(req, res) {
     try {
-        const roomId = parseInt(req.query.roomId);
+        const roomCode = req.query.roomCode;
         const userId = parseInt(req.query.userId);
         const owneruserId = req.user.id;
 
         const room = await prisma.room.findUnique({
             where: {
-                roomId: roomId
+                code: roomCode
             },
             include: {
                 users: true,
@@ -574,7 +573,7 @@ async function acceptOrRejectPendingUser(req, res) {
         const user = await prisma.user.findUnique({
             where: {
                 id: userId,
-                userRoomId: roomId
+                userRoomId: room.roomId
             }
         });
         if (!user) {
@@ -589,7 +588,7 @@ async function acceptOrRejectPendingUser(req, res) {
             where: {
                 id: owneruserId,
                 isCreator: true,
-                userRoomId: roomId
+                userRoomId: room.roomId
             }
         });
         if (!ownerUser) {
@@ -612,7 +611,7 @@ async function acceptOrRejectPendingUser(req, res) {
         if (req.query.action === 'accept') {
             await prisma.room.update({
                 where: {
-                    roomId: roomId
+                   code: roomCode
                 },
                 data: {
                     users: {
@@ -631,7 +630,7 @@ async function acceptOrRejectPendingUser(req, res) {
         } else if (req.query.action === 'reject') {
             await prisma.room.update({
                 where: {
-                    roomId: roomId
+                    roomId: room.roomId
                 },
                 data: {
                     pending: {

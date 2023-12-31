@@ -32,7 +32,7 @@ model Question {
   questionId Int      @id @default(autoincrement())
   question   String
   options    Option[] @relation("QuestionToOptions")
-  room       Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId], onDelete: Cascade)
+  room       Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId])
   roomId     Int
 
   @@index([roomId], name: "roomId")
@@ -71,4 +71,21 @@ model Message {
 
   @@index([userId], name: "id")
   @@index([roomId], name: "roomId")
+}
+
+model Quiz {
+  quizId    Int         @id @default(autoincrement())
+  questions Question[]  @relation("QuizToQuestions")
+}
+
+model Result {
+  resultId        Int         @id @default(autoincrement())
+  quiz            Quiz        @relation("ResultToQuiz", fields: [quizId], references: [quizId])
+  quizId          Int
+  optionsMarked   String[]
+  score           Int
+  user            User        @relation("UserToResults", fields: [userId], references: [id])
+  userId          Int
+  room            Room        @relation("RoomToResults", fields: [roomId], references: [roomId])
+  roomId          Int
 }
