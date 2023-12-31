@@ -9,6 +9,8 @@ async function createResult (req,res) {
         const quizId = req.body.quizId;
         const optionsMarked = req.body.optionsMarked;
         const roomId = req.body.roomId
+        const score = parseInt(req.body.score);
+
         const newResult = await prisma.result.create({
             data:{
                 quiz:{
@@ -17,6 +19,7 @@ async function createResult (req,res) {
                     }
                 },
                 optionsMarked,
+                score,
                 user : {
                     connect : {
                         id:req.user.id
