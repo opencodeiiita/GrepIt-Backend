@@ -1,91 +1,106 @@
 generator client {
-  provider = "prisma-client-js"
+    provider = "prisma-client-js"
 }
 
 datasource db {
-  provider     = "mysql"
-  url          = env("DATABASE_URL")
-  relationMode = "prisma"
+    provider     = "mysql"
+    url          = env("DATABASE_URL")
+    relationMode = "prisma"
 }
 
 // do not touch this model, this was for creating a non-empty db.
 model Init {
-  id Int @id @default(autoincrement())
+    id Int @id @default(autoincrement())
 }
 
 model User {
-  id           Int       @id @default(autoincrement())
-  name         String
-  email        String    @unique
-  password     String
-  currPoints   Int       @default(0)
-  userRoom     Room?     @relation("RoomToUsers", fields: [userRoomId], references: [roomId])
-  userRoomId   Int?
-  pendingRooms Room[]    @relation("RoomToPendingUsers")
-  isCreator    Boolean   @default(false)
-  messages     Message[] @relation("UserToMessages")
+    id           Int       @id @default(autoincrement())
+    name         String
+    email        String    @unique
+    password     String
+    currPoints   Int       @default(0)
+    userRoom     Room?     @relation("RoomToUsers", fields: [userRoomId], references: [roomId])
+    userRoomId   Int?
+    pendingRooms Room[]    @relation("RoomToPendingUsers")
+    isCreator    Boolean   @default(false)
+    messages     Message[] @relation("UserToMessages")
+    results      Result[]  @relation("UserToResults")
 
-  @@index([userRoomId], name: "userRoomId")
+    @@index([userRoomId], name: "userRoomId")
 }
 
 model Question {
-  questionId Int      @id @default(autoincrement())
-  question   String
-  options    Option[] @relation("QuestionToOptions")
-  room       Room     @relation("RoomToQuestions", fields: [roomId], references: [roomId])
-  roomId     Int
+    questionId Int      @id @default(autoincrement())
+    question   String
+    options    Option[] @relation("QuestionToOptions")
+    quiz       Quiz?    @relation("QuizToQuestions", fields: [quizId], references: [quizId])
+    quizId     Int?
 
-  @@index([roomId], name: "roomId")
+    @@index([quizId], name: "quizId")
 }
 
 model Option {
-  optionId   Int      @id @default(autoincrement())
-  option     String
-  question   Question @relation("QuestionToOptions", fields: [questionId], references: [questionId], onDelete: Cascade)
-  questionId Int
-  isCorrect  Boolean  @default(false)
+    optionId   Int      @id @default(autoincrement())
+    option     String
+    question   Question @relation("QuestionToOptions", fields: [questionId], references: [questionId], onDelete: Cascade)
+    questionId Int
+    isCorrect  Boolean  @default(false)
+    //the below two fields are not really required, so they'll be null in most cases
+    //they are initialised just to remove the prisma errors.
+    result     Result?  @relation("ResultToOptions", fields: [resultId], references: [resultId])
+    resultId   Int?
 
-  @@index([questionId], name: "questionId")
+    @@index([questionId], name: "questionId")
+    @@index([resultId], name: "resultId")
 }
 
 model Room {
-  roomId          Int        @id @default(autoincrement())
-  roomName        String
-  roomDescription String?
-  code            String     @unique
-  isClosed        Boolean    @default(false)
-  isInviteOnly    Boolean    @default(false)
-  questions       Question[] @relation("RoomToQuestions")
-  pending         User[]     @relation("RoomToPendingUsers")
-  users           User[]     @relation("RoomToUsers")
-  messages        Message[]  @relation("RoomToMessages")
+    roomId          Int       @id @default(autoincrement())
+    roomName        String
+    roomDescription String?
+    code            String    @unique
+    isClosed        Boolean   @default(false)
+    isInviteOnly    Boolean   @default(false)
+    pending         User[]    @relation("RoomToPendingUsers")
+    users           User[]    @relation("RoomToUsers")
+    messages        Message[] @relation("RoomToMessages")
+    quizzes         Quiz[]    @relation("RoomToQuizzes")
 }
 
 model Message {
-  messageId Int    @id @default(autoincrement())
-  message   String
-  user      User   @relation("UserToMessages", fields: [userId], references: [id])
-  userId    Int
-  room      Room   @relation("RoomToMessages", fields: [roomId], references: [roomId])
-  roomId    Int
+    messageId Int    @id @default(autoincrement())
+    message   String
+    user      User   @relation("UserToMessages", fields: [userId], references: [id])
+    userId    Int
+    room      Room   @relation("RoomToMessages", fields: [roomId], references: [roomId])
+    roomId    Int
 
-  @@index([userId], name: "id")
-  @@index([roomId], name: "roomId")
+    @@index([userId], name: "id")
+    @@index([roomId], name: "roomId")
 }
 
 model Quiz {
-  quizId    Int         @id @default(autoincrement())
-  questions Question[]  @relation("QuizToQuestions")
+    quizId    Int        @id @default(autoincrement())
+    questions Question[] @relation("QuizToQuestions")
+    room      Room       @relation("RoomToQuizzes", fields: [roomId], references: [roomId])
+    roomId    Int
+    //results of all the users who have attempted this quiz
+    //should be initialised as empty when the quiz is created.
+    //add all the user's results after the quiz is over.
+    results   Result[]   @relation("ResultToQuiz")
+
+    @@index([roomId], name: "roomId")
 }
 
 model Result {
-  resultId        Int         @id @default(autoincrement())
-  quiz            Quiz        @relation("ResultToQuiz", fields: [quizId], references: [quizId])
-  quizId          Int
-  optionsMarked   String[]
-  score           Int
-  user            User        @relation("UserToResults", fields: [userId], references: [id])
-  userId          Int
-  room            Room        @relation("RoomToResults", fields: [roomId], references: [roomId])
-  roomId          Int
+    resultId      Int      @id @default(autoincrement())
+    quiz          Quiz     @relation("ResultToQuiz", fields: [quizId], references: [quizId])
+    quizId        Int      @unique
+    optionsMarked Option[] @relation("ResultToOptions")
+    score         Int
+    user          User     @relation("UserToResults", fields: [userId], references: [id])
+    userId        Int
+
+    @@index([quizId], name: "quizId")
+    @@index([userId], name: "userId")
 }
