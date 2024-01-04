@@ -776,7 +776,7 @@ async function startQuiz(req, res) {
             'quiz started',
             room.users.map((user) => user.name)
         );
-        // await sendQuestions(roomCode, room.questions);
+        await sendQuestions(roomCode, newQuiz.questions);
 
         io.to(roomCode).emit('quiz ended');
         return response_200(res, 'Quiz ended successfully');
