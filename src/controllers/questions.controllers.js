@@ -6,6 +6,7 @@ async function addMultipleChoiceQuestion(req, res) {
         const question = req.body.question;
         const options = req.body.options;
         const roomCode = req.query.roomCode;
+        const quizId = req.query.quizId;
 
         const newQuestion = await prisma.question.create({
             data: {
@@ -26,6 +27,19 @@ async function addMultipleChoiceQuestion(req, res) {
             },
             include: {
                 options: true
+            }
+        });
+
+        await prisma.quiz.update({
+            where: {
+                quizId: quizId
+            },
+            data: {
+                questions: {
+                    connect: {
+                        questionId: newQuestion.questionId
+                    }
+                }
             }
         });
 

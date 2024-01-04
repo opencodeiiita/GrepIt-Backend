@@ -698,11 +698,6 @@ async function startQuiz(req, res) {
             },
             include: {
                 users: true,
-                questions: {
-                    include: {
-                        options: true
-                    }
-                }
             }
         });
 
@@ -727,11 +722,61 @@ async function startQuiz(req, res) {
             return;
         }
 
+        const newQuiz = await prisma.quiz.create({
+            data:{
+                room:{
+                    connect:{
+                        roomId: room.roomId
+                    }
+                }
+            }
+        })
+
+        await prisma.room.update({
+            where:{
+                roomId: room.roomId
+            },
+            data:{
+                quizzes:{
+                    connect:{
+                        quizId: newQuiz.quizId
+                    }
+                }
+            }
+        })
+
+        const getUsers = await prisma.user.findMany({
+            where:{
+                userRoomId: room.roomId
+            }
+        })
+
+        for(let i=0; i<getUsers.length; i++){
+            await prisma.result.create({
+                data:{
+                    user:{
+                        connect:{
+                            id: getUsers[i].id
+                        }
+                    },
+                    quiz:{
+                        connect:{
+                            quizId: newQuiz.quizId
+                        }
+                    },
+                    score: 0,
+                    optionsMarked: {
+                        create: []
+                    }
+                }
+            })
+        }
+
         io.to(roomCode).emit(
             'quiz started',
             room.users.map((user) => user.name)
         );
-        await sendQuestions(roomCode, room.questions);
+        // await sendQuestions(roomCode, room.questions);
 
         io.to(roomCode).emit('quiz ended');
         return response_200(res, 'Quiz ended successfully');
