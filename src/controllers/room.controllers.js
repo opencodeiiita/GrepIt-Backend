@@ -751,12 +751,12 @@ async function startQuiz(req, res) {
             }
         })
 
-        for(let i=0; i<getUsers.length; i++){
-            await prisma.result.create({
+        const resultPromise = getUsers.map((user) => {
+             prisma.result.create({
                 data:{
                     user:{
                         connect:{
-                            id: getUsers[i].id
+                            id: user.id
                         }
                     },
                     quiz:{
@@ -770,7 +770,9 @@ async function startQuiz(req, res) {
                     }
                 }
             })
-        }
+        })
+
+        await Promise.all(resultPromise);
 
         io.to(roomCode).emit(
             'quiz started',
