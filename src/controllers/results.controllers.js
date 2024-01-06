@@ -15,19 +15,19 @@ async function createResult (req,res) {
             data:{
                 quiz:{
                     connect:{
-                        quizId:quizId
+                        quizId: quizId
                     }
                 },
                 optionsMarked,
                 score,
                 user : {
                     connect : {
-                        id:req.user.id
+                        id: req.user.id
                     }
                 },
                 room : {
                     connect: {
-                        id:roomId
+                        id: roomId
                     }
                 }
             }

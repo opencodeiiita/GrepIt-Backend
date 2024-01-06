@@ -698,11 +698,6 @@ async function startQuiz(req, res) {
             },
             include: {
                 users: true,
-                questions: {
-                    include: {
-                        options: true
-                    }
-                }
             }
         });
 
@@ -727,11 +722,63 @@ async function startQuiz(req, res) {
             return;
         }
 
+        const newQuiz = await prisma.quiz.create({
+            data:{
+                room:{
+                    connect:{
+                        roomId: room.roomId
+                    }
+                }
+            }
+        })
+
+        await prisma.room.update({
+            where:{
+                roomId: room.roomId
+            },
+            data:{
+                quizzes:{
+                    connect:{
+                        quizId: newQuiz.quizId
+                    }
+                }
+            }
+        })
+
+        const getUsers = await prisma.user.findMany({
+            where:{
+                userRoomId: room.roomId
+            }
+        })
+
+        const resultPromise = getUsers.map((user) => {
+             prisma.result.create({
+                data:{
+                    user:{
+                        connect:{
+                            id: user.id
+                        }
+                    },
+                    quiz:{
+                        connect:{
+                            quizId: newQuiz.quizId
+                        }
+                    },
+                    score: 0,
+                    optionsMarked: {
+                        create: []
+                    }
+                }
+            })
+        })
+
+        await Promise.all(resultPromise);
+
         io.to(roomCode).emit(
             'quiz started',
             room.users.map((user) => user.name)
         );
-        await sendQuestions(roomCode, room.questions);
+        await sendQuestions(roomCode, newQuiz.questions);
 
         io.to(roomCode).emit('quiz ended');
         return response_200(res, 'Quiz ended successfully');
