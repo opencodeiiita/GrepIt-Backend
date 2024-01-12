@@ -87,8 +87,26 @@
                 });
         };
 
+        function addQuiz() {
+            fetch(`http://localhost:4000/api/v2/room/addQuiz?roomCode=${roomCode}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': 'Bearer ' + document.getElementById('token').value,
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Success:', data);
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                });
+        }
+
         function startQuiz() {
-            fetch(`http://localhost:4000/api/v1/room/startQuiz?roomCode=${roomCode}`, {
+            var quizId = document.getElementById('quizId').value;
+            fetch(`http://localhost:4000/api/v1/room/startQuiz?roomCode=${roomCode}&quizId=${quizId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -119,10 +137,13 @@
     <h2>Quiz Testing</h2>
     <h3>Enter the room code</h3>
     <input type="text" id="roomCode">
+    <h3>Enter the QuizId</h3>
+    <input type="text" id="quizId">
     <h3>Enter the token</h3>
     <input type="text" id="token">
     <button onclick="joinRoom()">Join Room</button>
     <button onclick="leaveRoom()">Leave Room</button>
+    <button onclick="addQuiz()">Add Quiz</button>
     <button onclick="startQuiz()">Start Quiz</button>
     <div class="roomDetails" hidden>
         <h2>Room Details</h2>

@@ -688,9 +688,106 @@ async function leaderboardRoom(req, res) {
     }
 }
 
-async function startQuiz(req, res) {
+async function addQuiz(req, res) {
     try {
         const roomCode = req.query.roomCode;
+        const userId = req.user.id;
+
+        const room = await prisma.room.findUnique({
+            where: {
+                code: roomCode
+            },
+            include: {
+                users: true
+            }
+        });
+        if (!room) {
+            console.log('Error updating room: Room does not exist');
+            res.status(400).json({
+                error: 'Room does not exist'
+            });
+            return;
+        }
+        const userOwnsRoom = await prisma.user.findUnique({
+            where: {
+                id: userId,
+                isCreator: true,
+                userRoomId: room.roomId
+            }
+        });
+
+        if (!userOwnsRoom) {
+            console.log(
+                'Error updating room: User is not the creator of the room'
+            );
+            response_403(res, 'User is not the creator of the room');
+            return;
+        }
+
+        const newQuiz = await prisma.quiz.create({
+            data: {
+                room: {
+                    connect: {
+                        roomId: room.roomId
+                    }
+                }
+            }
+        });
+        await prisma.room.update({
+            where: {
+                roomId: room.roomId
+            },
+            data: {
+                quizzes: {
+                    connect: {
+                        quizId: newQuiz.quizId
+                    }
+                }
+            }
+        });
+
+        const users = await prisma.user.findMany({
+            where: {
+                userRoomId: room.roomId
+            }
+        });
+
+        const resultPromise = users.map((user) => {
+            return prisma.result.create({
+                data: {
+                    user: {
+                        connect: {
+                            id: user.id
+                        }
+                    },
+                    quiz: {
+                        connect: {
+                            quizId: newQuiz.quizId
+                        }
+                    },
+                    score: 0,
+                    optionsMarked: {
+                        create: []
+                    }
+                }
+            });
+        });
+
+        await Promise.all(resultPromise);
+
+
+        response_200(res, 'Quiz added successfully', newQuiz);
+    } catch (e) {
+        console.error(`Error updating room: ${e}`);
+        response_500(res, `Error updating room`, e);
+    }
+}
+
+async function startQuiz(req, res) {
+    try {
+
+        const roomCode = req.query.roomCode;
+        const QuizId = req.query.quizId;
         const owneruserId = req.user.id;
         const room = await prisma.room.findUnique({
             where: {
@@ -714,6 +811,7 @@ async function startQuiz(req, res) {
                 userRoomId: room.roomId
             }
         });
+
         if (!ownerUser) {
             console.log(
                 'Error starting quiz: User is not the creator of the room'
@@ -722,28 +820,18 @@ async function startQuiz(req, res) {
             return;
         }
 
-        const newQuiz = await prisma.quiz.create({
-            data:{
-                room:{
-                    connect:{
-                        roomId: room.roomId
-                    }
-                }
-            }
-        })
-
-        await prisma.room.update({
-            where:{
-                roomId: room.roomId
+        const Quiz = await prisma.quiz.findUnique({
+            where: {
+                quizId: Number(QuizId)
             },
-            data:{
-                quizzes:{
-                    connect:{
-                        quizId: newQuiz.quizId
+            include: {
+                questions: {
+                    include: {
+                        options: true
                     }
                 }
             }
-        })
+        });
 
         const getUsers = await prisma.user.findMany({
             where:{
@@ -751,45 +839,24 @@ async function startQuiz(req, res) {
             }
         })
 
-        const resultPromise = getUsers.map((user) => {
-             return prisma.result.create({
-                data:{
-                    user:{
-                        connect:{
-                            id: user.id
-                        }
-                    },
-                    quiz:{
-                        connect:{
-                            quizId: newQuiz.quizId
-                        }
-                    },
-                    score: 0,
-                    optionsMarked: {
-                        create: []
-                    }
-                }
-            })
-        })
-
-        await Promise.all(resultPromise);
-
         io.to(roomCode).emit(
             'quiz started',
             room.users.map((user) => user.name)
         );
-        // await sendQuestions(roomCode, newQuiz.questions);
+
+        await sendQuestions(roomCode, Quiz.questions);
 
         const updateResult = getUsers.map((user) => {
-            return prisma.result.update({
+            return prisma.result.updateMany({
                 where: {
                     userId: user.id,
-                    quizId: newQuiz.quizId
+                    quizId: Quiz.quizId
                 },
                 data: {
                     score: user.currPoints
                 }
-            })
+            });
+
         })
 
         await Promise.all(updateResult);
@@ -918,7 +985,7 @@ async function sendMessageAfterQuiz(req, res) {
             return;
         }
 
-        const userInRoom = room.users.find((user) => user.id == userId);
+        const userInRoom = room.users.find((user) => user.id === userId);
         if (!userInRoom) {
             console.log(
                 'Error removing user from room: User is not in the room'
@@ -980,6 +1047,7 @@ export {
     transferOwnership,
     acceptOrRejectPendingUser,
     leaderboardRoom,
+    addQuiz,
     startQuiz,
     sendMessageAfterQuiz
 };
