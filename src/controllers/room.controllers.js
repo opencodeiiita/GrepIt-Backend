@@ -752,7 +752,7 @@ async function startQuiz(req, res) {
         })
 
         const resultPromise = getUsers.map((user) => {
-             prisma.result.create({
+             return prisma.result.create({
                 data:{
                     user:{
                         connect:{
@@ -778,7 +778,21 @@ async function startQuiz(req, res) {
             'quiz started',
             room.users.map((user) => user.name)
         );
-        await sendQuestions(roomCode, newQuiz.questions);
+        // await sendQuestions(roomCode, newQuiz.questions);
+
+        const updateResult = getUsers.map((user) => {
+            return prisma.result.update({
+                where: {
+                    userId: user.id,
+                    quizId: newQuiz.quizId
+                },
+                data: {
+                    score: user.currPoints
+                }
+            })
+        })
+
+        await Promise.all(updateResult);
 
         io.to(roomCode).emit('quiz ended');
         return response_200(res, 'Quiz ended successfully');
